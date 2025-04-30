@@ -4,6 +4,6 @@ I’m really excited to share this portfolio, where I’m starting to build and 
 
 Feel free to explore my projects — they highlight my skills and the way I tackle challenges!
 
-1. Link
+1. [Sales Dashboard - Superstore Dataset](https://github.com/NicoleHoppy/Projects/tree/main/Sales%20Dashboard%20-%20Superstore%20Dataset)
 2. Link
 3. Link
