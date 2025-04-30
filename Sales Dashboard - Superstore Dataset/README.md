@@ -12,4 +12,4 @@ The goal of this project was to design an interactive sales dashboard that makes
 
 ## Visualization
 
-![Power BI - Sales Dashboard - image](images/image1.png?raw=true)
+![Power BI - Sales Dashboard](images/image1.png)
