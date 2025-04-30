@@ -8,3 +8,8 @@ The goal of this project was to design an interactive sales dashboard that makes
 
 - Source: [Superstore Dataset - Kaggle](https://www.kaggle.com/datasets/vivek468/superstore-dataset-final) - dataset containing Sales & Profits of a Superstore
 - Data size: 
+
+
+## Visualization
+
+(Power BI - Sales Dashboard - image.png)[Power BI - Sales Dashboard - image.png]
