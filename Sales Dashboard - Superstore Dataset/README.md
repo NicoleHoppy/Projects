@@ -13,11 +13,16 @@ The goal of this project was to design an interactive sales dashboard that makes
 ## 3. What I did
 
 - Cleaned and transformed the raw data
-- Calculated main values like Total Profit, Total Sales, Profit Margin, Average Order Value, Number of Orders,
+- Calculated main values like: Total Profit, Total Sales, Profit Margin, Average Order Value, Number of Orders,
 - Designed a dashboard withcharts, filters by Date, Region and Category and a clean layout
 - Created visualisations like line charts, bar charts, pie charts and top 5 product ranking
 
+## 4. Sample Insights
+
+- Technology category generates the highest revenue, while Furniture category generates the lowest
 
 ## Visualization
+
+Feel free to explore my dashboard in Power BI file that you can find here: 
 
 ![Power BI - Sales Dashboard](images/image1.png)
