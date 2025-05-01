@@ -31,7 +31,11 @@ Customer segment has the highest order count but lower Average Order Value than 
 
 ![Power BI - Sales Dashboard](images/image3.png)
 
-## Visualization
+## 5. Outcome
+
+A clean, user-friendly dashboard that supports fast, intuitive analysis of sales data. The [roject demonstrates skills in data wrangling, use of DAX and dashboard design using Power BI.
+
+## 6. Visualization
 
 Feel free to explore my dashboard in Power BI file that you can find here: [Sales Dashboard - Superstore Dataset](https://github.com/NicoleHoppy/Projects/blob/main/Sales%20Dashboard%20-%20Superstore%20Dataset/Power%20BI%20-%20Sales%20Dashboard.pbix)
 
