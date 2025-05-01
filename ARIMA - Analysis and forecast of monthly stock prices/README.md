@@ -11,7 +11,9 @@ In this project my main goal is to use time series of interest to analyze and fo
 ## 3. Introducing the data
 Let’s first have a look at our data. This series is containing monthly stock prices of CD Projekt S.A. from January 2015 to December 2020. The currency of those prices is in Polish currency PLN. PLN to EUR converter is 0.22 on the day 20 January 2021.
 
-<img src="images/image1.png" alt="Description" width = 600 style="display: block; margin: 0 auto">
+<p align="center">
+<img src="images/image1.png" alt="Description" width = 600 />
+</p>
 
 The company was founded in May 1994 by Marcin Iwiński and Michał Kiciński, but it debuted only in 2011 on the stock market as a result of collaboration with Optimus (the computer business which was on a verge of bankruptcy). The years before 2015 were 1 not the best for the company and the prices remained practically at the same very low value ( 7.00PLN). That’s why I am considering this time series starting from January 2015, because this is the most interesting period to analyze.
 
