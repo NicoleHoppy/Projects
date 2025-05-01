@@ -1,9 +1,9 @@
-# Projects
+# Introduction
 
-I’m really excited to share this portfolio, where I’m starting to build and showcase my skills in data analysis. I’ve been diving into tools like Power BI, Excel, R, and SQL to collect, explore, and visualize data, all with the goal of helping make smarter decisions. Each project is a small step in my journey, showing how I tackle problems and focus on the details — and I can't wait to bring this energy and mindset into my first data analysis role!
+While studying, I got really into data analysis - especially time series. This project is one I worked on using GRETL, where I used ARIME and SARIMA models to forecast sales.It was a great way to turn theory into something more hands-on and actually see how those models work in practice.
 
-Feel free to explore my projects — they highlight my skills and the way I tackle challenges!
+Feel free to check it out and see what insights I found!
 
-1. [Sales Dashboard - Superstore Dataset](https://github.com/NicoleHoppy/Projects/tree/main/Sales%20Dashboard%20-%20Superstore%20Dataset)
-2. Link
-3. Link
+# Abstract
+
+In this project my main goal is to use time series of interest to analyze and forecast. I have chosen monthly stock prices of a Polish video game developer, publisher and distributor CD Projekt S.A. Firstly, I will introduce data and tell a little bit about important dates which were affecting this time series. Later I will conclude if this time series can be considered as a representation of stationary process. Next I will analyze correlogram and also use automatic criteria in order to identify test models. Then I will estimate those models using the training set and also check them, that is establish if residuals of those models can be considered as a realization of white noise process and also I will check whether the residuals are normally distributed or not. Finally I will forecast using those models and I will compare them to the real values of the test set. At the end I will summarize my observations
