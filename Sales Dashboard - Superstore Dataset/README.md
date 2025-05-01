@@ -25,6 +25,12 @@ Technology is the top-performing product category in terms of revenue, especiall
 
 ![Power BI - Sales Dashboard](images/image2.png)
 
+- **Customer segment has the most orders but lower value**
+  
+Customer segment has the highest order count but lower Average Order Value than Corporate or Home Office segment.
+
+![Power BI - Sales Dashboard](images/image3.png)
+
 ## Visualization
 
 Feel free to explore my dashboard in Power BI file that you can find here: [Sales Dashboard - Superstore Dataset](https://github.com/NicoleHoppy/Projects/blob/main/Sales%20Dashboard%20-%20Superstore%20Dataset/Power%20BI%20-%20Sales%20Dashboard.pbix)
