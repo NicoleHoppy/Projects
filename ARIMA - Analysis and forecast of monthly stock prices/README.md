@@ -1,9 +1,7 @@
-# Projects
+# Introduction
 
-I’m really excited to share this portfolio, where I’m starting to build and showcase my skills in data analysis. I’ve been diving into tools like Power BI, Excel, R, and SQL to collect, explore, and visualize data, all with the goal of helping make smarter decisions. Each project is a small step in my journey, showing how I tackle problems and focus on the details — and I can't wait to bring this energy and mindset into my first data analysis role!
+While studying, I got really into data analysis - especially time series. This project is one I worked on using GRETL, where I used ARIME and SARIMA models to forecast sales.It was a great way to turn theory into something more hands-on and actually see how those models work in practice.
 
-Feel free to explore my projects — they highlight my skills and the way I tackle challenges!
+Feel free to check it out and see what insights I found!
 
-1. [Sales Dashboard - Superstore Dataset](https://github.com/NicoleHoppy/Projects/tree/main/Sales%20Dashboard%20-%20Superstore%20Dataset)
-2. Link
-3. Link
+# Abstract
