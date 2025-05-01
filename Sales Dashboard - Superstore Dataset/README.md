@@ -23,6 +23,6 @@ The goal of this project was to design an interactive sales dashboard that makes
 
 ## Visualization
 
-Feel free to explore my dashboard in Power BI file that you can find here: (Sales Dashboard - Superstore Dataset)[https://github.com/NicoleHoppy/Projects/blob/main/Sales%20Dashboard%20-%20Superstore%20Dataset/Power%20BI%20-%20Sales%20Dashboard.pbix]
+Feel free to explore my dashboard in Power BI file that you can find here: [Sales Dashboard - Superstore Dataset](https://github.com/NicoleHoppy/Projects/blob/main/Sales%20Dashboard%20-%20Superstore%20Dataset/Power%20BI%20-%20Sales%20Dashboard.pbix)
 
 ![Power BI - Sales Dashboard](images/image1.png)
