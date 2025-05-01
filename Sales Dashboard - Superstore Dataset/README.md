@@ -17,9 +17,13 @@ The goal of this project was to design an interactive sales dashboard that makes
 - Designed a dashboard withcharts, filters by Date, Region and Category and a clean layout
 - Created visualisations like line charts, bar charts, pie charts and top 5 product ranking
 
-## 4. Sample Insights
+## 4. Insights
 
-- Technology category generates the highest revenue, while Furniture category generates the lowest
+- **Technology drives the highest revenue**
+
+Technology is the top-performing product category in terms of revenue, especially in Q4, likely due to seasonal demand and higher unit prices.
+
+![Power BI - Sales Dashboard](images/image2.png)
 
 ## Visualization
 
