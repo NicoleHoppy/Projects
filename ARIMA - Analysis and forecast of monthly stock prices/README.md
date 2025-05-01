@@ -21,7 +21,9 @@ On May 2015 the company released The Witcher 3: Wild Hunt based on the book seri
 
 The plot below contains those important dates.
 
-![Power BI - Sales Dashboard](images/image2.png)
+<p align="center">
+<img src="images/image2.png" alt="Description" width = 600 />
+</p>
 
 Let’s now concentrate on analyzing our time series using tools that I learned during the course. Firstly, I will consider whether this time series is a representation of a stationary process or not.
 
@@ -29,14 +31,44 @@ Let’s now concentrate on analyzing our time series using tools that I learned 
 
 Looking at the plot of our time series we can conclude that this clearly is not a representation of a stationary process. There is a trend and also by looking at the correlogram of this time series we can see that.
 
-![Power BI - Sales Dashboard](images/image3.png)
+<p align="center">
+<img src="images/image3.png" alt="Description" width = 600 />
+</p>
 
 So now what we need to do is to transform it in a way to get the stationary process. I have decided to consider this time series as a seasonal time series because during forecast I obtained better forecasts when I removed seasonal component. My first attempt to obtain stationary process was using first difference of my observed values and then the seasonal difference. But although the expected value was 0, the variance was not constant. The plot below shows this result.
 
-![Power BI - Sales Dashboard](images/image4.png)
+<p align="center">
+<img src="images/image4.png" alt="Description" width = 600 />
+</p>
 
 Clearly, in the above plot we can see that the variance is increasing over time. That’s why now I am using log transformation to stabilize it and then both first and seasonal differences.
 
-![Power BI - Sales Dashboard](images/image5.png)
+<p align="center">
+<img src="images/image5.png" alt="Description" width = 600 />
+</p>
 
 In this situation we can see that the mean is equal to 0 and we can assume that the variance is more or less constant. That’s why now, after all the transformations, this time series can be considered as a representation of a stationary process. So now we will consider correlogram of that transformed time series and also we will use automatic criteria in order to conclude test models.
+
+## 5. Correlograms and Automatic criteria
+
+Let’s now have a look at the information of our transformed data.
+
+<p align="center">
+<img src="images/image6.png" alt="Description" width = 600 />
+</p>
+
+And now on the correlogram of our transformed data.
+
+<p align="center">
+<img src="images/image7.png" alt="Description" width = 600 />
+</p>
+
+Looking at this information we need to think a little which models will be appropriate to consider later. Let’s look at partial auto-correlation function. We can see that the second coefficient is slightly different from zero. It can make sense to consider SARIMA(0,1,2)x(0,1,2). Let’s look at what automatic criteria is saying.
+
+<p align="center">
+<img src="images/image8.png" alt="Description" width = 600 />
+</p>
+
+From what we can see I was right. So the models that I will consider will be SARIMA(0,1,2)x(0,1,2) and also SARIMA(2,1,2)x(2,1,2). Having in mind airline model I will also consider SARIMA(0,1,1)x(0,1,1).
+
+## 6. Estimating and checking models
