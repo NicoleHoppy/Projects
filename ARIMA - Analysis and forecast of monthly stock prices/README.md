@@ -72,3 +72,15 @@ Looking at this information we need to think a little which models will be appro
 From what we can see I was right. So the models that I will consider will be SARIMA(0,1,2)x(0,1,2) and also SARIMA(2,1,2)x(2,1,2). Having in mind airline model I will also consider SARIMA(0,1,1)x(0,1,1).
 
 ## 6. Estimating and checking models
+
+Firstly, let’s notice that we have 72 observations which will be divided into two sets: the training set and the test set. The training set will contain 62 observations and to the test set will belong last 10 observations. Now I will estimate those models using the training set  which contains dates from January 2015 to February 2020.
+
+I will start my considerations with analyzing SARIMA(0,1,2)x(0,1,2).
+
+## 6.1  SARIMA (0,1,2)x(0,1,2)
+
+By creating the model SARIMA (0,1,2)x(0,1,2) from the training set we are getting the following:
+
+<p align="center">
+<img src="images/image9.png" alt="Description" width = 600 />
+</p>
