@@ -84,3 +84,9 @@ By creating the model SARIMA (0,1,2)x(0,1,2) from the training set we are gettin
 <p align="center">
 <img src="images/image9.png" alt="Description" width = 600 />
 </p>
+
+Looking at p-value we can see that coefficient Theta_1 is significantly different from zero. Now let’s have a look at the correlogram of residuals to consider if residuals can be a representation of white noise process.
+
+<p align="center">
+<img src="images/image10.png" alt="Description" width = 600 />
+</p>
