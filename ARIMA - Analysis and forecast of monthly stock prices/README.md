@@ -105,7 +105,7 @@ From this histogram we can conclude that the residuals are normally distributed.
 
 We can see that this model is quite good. It didn’t forecast too well but looking at the past values this forecasting is making sense. It predicted the drop down of stock prices at the moment of the biggest drop. Let’s remember that Root Mean Squared Error in this case is equal to 0.22675.
 
-##  4.2 SARIMA (2,1,2)x(2,1,2)
+##  6.2 SARIMA (2,1,2)x(2,1,2)
 
 Now we are considering SARIMA (2,1,2)x(2,1,2) and obtaining the following result.
 
@@ -115,3 +115,25 @@ Now we are considering SARIMA (2,1,2)x(2,1,2) and obtaining the following result
 <p align="center">
 <img src="images/image14.png" alt="Description" width = 600 />
 </p>
+
+We can see that most of the coefficients are not significantly different from zero. Let’s now look at the correlogram of residuals.
+
+<p align="center">
+<img src="images/image15.png" alt="Description" width = 600 />
+</p>
+
+We can conclude that they are representation of white noise process, because there is no residual that is significantly different from zero. Let’s check normality of the residuals.
+
+<p align="center">
+<img src="images/image16.png" alt="Description" width = 600 />
+</p>
+
+We can also see that those residuals are normally distributed (we can conclude that looking at p-value) so they are representing Gaussian white noise process. Now we use forecasting tools to get:
+
+<p align="center">
+<img src="images/image17.png" alt="Description" width = 600 />
+</p>
+
+And we see that it again predicted the fall of the prices as the model before. Still not good, but satisfactory. Let’s keep in mind that Root Mean Squared Error equals 0.20448 (a bit better than the previous).
+
+## 6.3 SARIMA(0,1,1)x(0,1,1)
