@@ -1,12 +1,12 @@
-## 1. Analiza win
+## 1. Analysis of wines
 
-Zbiór danych wykorzystany do poniższej analizy pochodzi ze strony [kaggle.com](https://www.kaggle.com/datasets/shelvigarg/wine-quality-dataset/data). Jest to zbiór zawierający dane o czerwonym oraz białym wariancie wina "Vinho Verde", pochodzącego z północy Portugalii.
+The dataset used for the following analysis comes from kaggle.com. It contains data of both red and white variants of "Vinho Verde" wine, originating from northern Portugal.
 
-Celem niniejszej analizy jest zastosowanie *regresji liniowej*.
+The purpose of this analysis is to apply linear regression.
 
-*Regresja liniowa* to metoda statystyczna, wykorzystywana do badania zależności między jedną zmienną zależną a jedną lub większą liczbą zmiennych niezależnych. Polega ona na próbie dopasowania linii do danych, aby zrozumieć charakter relacji między nimi.
+*Linear regression* is a statistical method used to examine the relationship between one dependent variable and one or more independent variables. It involves attempting to fit a line to the data in order to understand the nature of the relationship between them.
 
-Załadujemy na początek potrzebne biblioteki, żeby funkcje, które są wykorzystywane w projekcie, działały poprawnie.
+First, we will load the necessary libraries so that the functions used in the project work correctly.
 
 ```{r,message = FALSE, warning = FALSE}
 library(car)
