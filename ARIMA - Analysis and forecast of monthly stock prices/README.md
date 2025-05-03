@@ -90,3 +90,50 @@ Looking at p-value we can see that coefficient Theta_1 is significantly differen
 <p align="center">
 <img src="images/image10.png" alt="Description" width = 600 />
 </p>
+
+We can consider residuals to be a representation of white noise process because we can’t see coefficients that are significantly different from zero. Let’s also test if the residuals are normally distributed.
+
+<p align="center">
+<img src="images/image11.png" alt="Description" width = 600 />
+</p>
+
+From this histogram we can conclude that the residuals are normally distributed. Then we can conclude that the residuals can be representation of Gaussian white noise process. So we checked assumptions that we needed to check to conclude if our model is correct. Now let’s try to forecast.
+
+<p align="center">
+<img src="images/image12.png" alt="Description" width = 600 />
+</p>
+
+We can see that this model is quite good. It didn’t forecast too well but looking at the past values this forecasting is making sense. It predicted the drop down of stock prices at the moment of the biggest drop. Let’s remember that Root Mean Squared Error in this case is equal to 0.22675.
+
+##  6.2 SARIMA (2,1,2)x(2,1,2)
+
+Now we are considering SARIMA (2,1,2)x(2,1,2) and obtaining the following result.
+
+<p align="center">
+<img src="images/image13.png" alt="Description" width = 600 />
+</p>
+<p align="center">
+<img src="images/image14.png" alt="Description" width = 600 />
+</p>
+
+We can see that most of the coefficients are not significantly different from zero. Let’s now look at the correlogram of residuals.
+
+<p align="center">
+<img src="images/image15.png" alt="Description" width = 600 />
+</p>
+
+We can conclude that they are representation of white noise process, because there is no residual that is significantly different from zero. Let’s check normality of the residuals.
+
+<p align="center">
+<img src="images/image16.png" alt="Description" width = 600 />
+</p>
+
+We can also see that those residuals are normally distributed (we can conclude that looking at p-value) so they are representing Gaussian white noise process. Now we use forecasting tools to get:
+
+<p align="center">
+<img src="images/image17.png" alt="Description" width = 600 />
+</p>
+
+And we see that it again predicted the fall of the prices as the model before. Still not good, but satisfactory. Let’s keep in mind that Root Mean Squared Error equals 0.20448 (a bit better than the previous).
+
+## 6.3 SARIMA(0,1,1)x(0,1,1)
