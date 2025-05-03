@@ -90,3 +90,28 @@ Looking at p-value we can see that coefficient Theta_1 is significantly differen
 <p align="center">
 <img src="images/image10.png" alt="Description" width = 600 />
 </p>
+
+We can consider residuals to be a representation of white noise process because we can’t see coefficients that are significantly different from zero. Let’s also test if the residuals are normally distributed.
+
+<p align="center">
+<img src="images/image11.png" alt="Description" width = 600 />
+</p>
+
+From this histogram we can conclude that the residuals are normally distributed. Then we can conclude that the residuals can be representation of Gaussian white noise process. So we checked assumptions that we needed to check to conclude if our model is correct. Now let’s try to forecast.
+
+<p align="center">
+<img src="images/image12.png" alt="Description" width = 600 />
+</p>
+
+We can see that this model is quite good. It didn’t forecast too well but looking at the past values this forecasting is making sense. It predicted the drop down of stock prices at the moment of the biggest drop. Let’s remember that Root Mean Squared Error in this case is equal to 0.22675.
+
+##  4.2 SARIMA (2,1,2)x(2,1,2)
+
+Now we are considering SARIMA (2,1,2)x(2,1,2) and obtaining the following result.
+
+<p align="center">
+<img src="images/image13.png" alt="Description" width = 600 />
+</p>
+<p align="center">
+<img src="images/image14.png" alt="Description" width = 600 />
+</p>
