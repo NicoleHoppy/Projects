@@ -11,9 +11,15 @@ The Excel file included in the portfolio presents two strategies for purchasing 
 
 - Sheet 1 – Home Page: Contains basic input data for the calculations and a summary of the results for both strategies.
 
+![Home page](images/image1.png)
+
 - Sheet 2 – Strategy 1: Involves saving money for several years and then purchasing an apartment.
 
+![Strategy 1](images/image2.png)
+
 - Sheet 3 – Strategy 2: Involves taking out a mortgage for x years, buying an apartment, and repaying the loan.
+
+![Strategy 2](images/image3.png)
 
 ## Conclusions:
 
