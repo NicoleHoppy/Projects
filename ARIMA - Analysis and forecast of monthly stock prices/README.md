@@ -137,3 +137,45 @@ We can also see that those residuals are normally distributed (we can conclude t
 And we see that it again predicted the fall of the prices as the model before. Still not good, but satisfactory. Let’s keep in mind that Root Mean Squared Error equals 0.20448 (a bit better than the previous).
 
 ## 6.3 SARIMA(0,1,1)x(0,1,1)
+
+Finally let’s consider now our last model, which is SARIMA (0,1,1)x(0,1,1). This is our result:
+
+<p align="center">
+<img src="images/image18.png" alt="Description" width = 600 />
+</p>
+
+We can see that only one parameter, Theta_1, is significantly different from zero. We are seeing it looking at p-value. Let’s also give a look at the correlogram of the residuals.
+
+<p align="center">
+<img src="images/image19.png" alt="Description" width = 600 />
+</p>
+
+In the correlogram we can see that there are coefficients which are significantly different from zero. So we probably can’t say that the residuals of this model can be considered as a realization of a white noise process. Let’s also have a look at histogram to check normality of the residuals.
+
+<p align="center">
+<img src="images/image20.png" alt="Description" width = 600 />
+</p>
+
+We can see that p-value, equal to 06479, is saying to us that the residuals are normally distributed. But anyway let’s look at a forecast.
+
+<p align="center">
+<img src="images/image21.png" alt="Description" width = 600 />
+</p>
+
+It looks like this one is the best. There is a moment when the predicted values are practically the same as the real ones. Also Root Mean Squared Error is equal to 0.1805.
+
+## 7. Summary
+
+From the analysis we did, we get very interesting results that will be presented here. First of all let’s compare the plots of our forecasts.
+
+<p align="center">
+<img src="images/image22.png" alt="Description" width = 600 />
+</p>
+
+We can see that the first two models are really alike, because they forecast in a very  similar way. The third model is the best because at some point the predicted values are practically the same as real stock prices. Let’s also see the comparison of Root Mean Squared Error. The result is presented in the following table:
+
+<p align="center">
+<img src="images/image23.png" alt="Description" width = 600 />
+</p>
+
+Looking at the plots and taking the minimum of presented Root Mean Squared Errors, we can conclude that the best model is SARIMA(011) (011), though the correlogram of the residuals is not truly presenting a realization of a white noise process. The next best model is SARIMA(212) (212). Moreover the residuals of this model are realization of a white noise process.
