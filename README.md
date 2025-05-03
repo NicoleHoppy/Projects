@@ -6,4 +6,4 @@ Feel free to explore my projects — they highlight my skills and the way I tack
 
 1. [Sales Dashboard - Superstore Dataset](https://github.com/NicoleHoppy/Projects/tree/main/Sales%20Dashboard%20-%20Superstore%20Dataset)
 2. [ARIMA - Analysis and forecast of monthly stock prices](https://github.com/NicoleHoppy/Projects/tree/main/ARIMA%20-%20Analysis%20and%20forecast%20of%20monthly%20stock%20prices)
-3. Link
+3. [Excel - Apartment Purchase Simulation](https://github.com/NicoleHoppy/Projects/tree/main/Excel%20-%20Apartment%20Purchase%20Simulation)
