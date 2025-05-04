@@ -152,7 +152,7 @@ corrplot(white_matrix, type = "lower")
 ```
 
 <p align="center">
-<img src="images/image6.png" alt="Figure 6" width = 1000 />
+<img src="images/image6.png" alt="Figure 6" width = 600 />
 </p>
 
 *Correlation* tells us how two variables move together. The Pearson correlation coefficient (which ranges from -1 to 1) is a handy number that shows us the strength and direction of the relationship.
@@ -206,19 +206,19 @@ for(i in 1:countM){
 ```
 
 <p align="center">
-<img src="images/image7.png" alt="Figure 7" width = 1000 />
+<img src="images/image7.png" alt="Figure 7" width = 600 />
 </p>
 
 <p align="center">
-<img src="images/image8.png" alt="Figure 8" width = 1000 />
+<img src="images/image8.png" alt="Figure 8" width = 600 />
 </p>
 
 <p align="center">
-<img src="images/image9.png" alt="Figure 9" width = 1000 />
+<img src="images/image9.png" alt="Figure 9" width = 600 />
 </p>
 
 <p align="center">
-<img src="images/image10.png" alt="Figure 10" width = 1000 />
+<img src="images/image10.png" alt="Figure 10" width = 600 />
 </p>
 
 Just by glancing at the summaries, it’s pretty obvious that the last model (the one without both sugar and alcohol) performs the worst — especially when you look at the adjusted R-squared, which is way lower than in the other models. To double-check whether the smaller models are valid, we’ll run an ANOVA test.
@@ -241,6 +241,10 @@ for(i in 2:countM){
 }
 ```
 
+<p align="center">
+<img src="images/image11.png" alt="Figure 11" width = 600 />
+</p>
+
 From the test results, at a significance level of α = 0.05, we can reject H₀ — meaning the smaller models (where we removed variables strongly correlated with density) don’t perform well enough.
 
 #### 3.1.2. Backward Elimination + ANOVA
@@ -253,6 +257,10 @@ We’ll start with the full model (the one with all variables), and begin elimin
 elim <- add_model('no acid', lm(quality ~ . - citric.acid, data = lrn), FALSE)
 anova(get_model(1), get_model(countM))
 ```
+
+<p align="center">
+<img src="images/image12.png" alt="Figure 12" width = 600 />
+</p>
 
 ```{r}
 summary(get_model(countM))
