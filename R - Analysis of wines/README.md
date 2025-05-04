@@ -92,13 +92,17 @@ Once we remove the rows with missing values, let’s take another look at our up
 (sapply(wine_clean, function(x) {sum(is.na(x))}))
 ```
 
+<p align="center">
+<img src="images/image5.png" alt="Figure 5" width = 1000 />
+</p>
+
 Now everything looks good — no missing data, so our dataset is ready to go!
 
 In this dataset, the variable we’re trying to predict is quality, which represents the wine’s rating. All the other variables are independent (predictor) variables, and they’re numerical in nature. As for quality, it can actually be seen in two ways: either as a continuous numeric variable or as an ordinal categorical variable (since it reflects a quality rating).
 
 In our analysis, we’ll first treat quality as a numeric variable when applying linear regression. But later on, when we build a proportional odds model, we’ll treat it as an ordinal categorical variable. Also, for hypothesis testing, we’ll be using a significance level of α = 0.05.
 
-### 2.1 Splitting the Dataset
+### 2.1. Splitting the Dataset
 
 We’re going to start by splitting the dataset based on the wine type — white and red. For this analysis, we’ll keep things simple and focus only on white wine. If you want, you can run a similar analysis later for red wine by following the same steps.
 
