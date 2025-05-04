@@ -1,12 +1,12 @@
 ## 1. Analysis of wines
 
-The dataset used for the following analysis comes from kaggle.com. It contains data of both red and white variants of "Vinho Verde" wine, originating from northern Portugal.
+The dataset we’ll be working with comes from [kaggle.com](https://www.kaggle.com/datasets/shelvigarg/wine-quality-dataset/data) and includes info on both red and white "Vinho Verde" wines — a variety from northern Portugal.
 
-The purpose of this analysis is to apply linear regression.
+In this project, we’re going to explore how well *linear regression* can model the data.
 
-*Linear regression* is a statistical method used to examine the relationship between one dependent variable and one or more independent variables. It involves attempting to fit a line to the data in order to understand the nature of the relationship between them.
+*Linear regression* is basically a way to figure out how one variable (like wine quality) is influenced by others (like acidity, alcohol content, etc.). We try to draw a line through the data points that best captures the trend or relationship between them.
 
-First, we will load the necessary libraries so that the functions used in the project work correctly.
+But before we dive into any analysis, let’s load up the necessary libraries so that everything runs smoothly.
 
 ```{r,message = FALSE, warning = FALSE}
 library(car)
@@ -82,28 +82,28 @@ In this dataset, the variable we’re trying to predict is quality, which repres
 
 In our analysis, we’ll first treat quality as a numeric variable when applying linear regression. But later on, when we build a proportional odds model, we’ll treat it as an ordinal categorical variable. Also, for hypothesis testing, we’ll be using a significance level of α = 0.05.
 
-### 2.1 Podział zbioru danych
+### 2.1 Splitting the Dataset
 
-Podzielimy nasz zbiór danych na podstawie wariantu wina - białe i czerwone. W niniejszej analizie skupimy się jedynie na przeanalizowaniu danych dot. białego wina. Dla czerwonego wariantu wina można zrobić osobną analizę, przechodząc analogicznie przez kroki, jakie wykonaliśmy dla białego wina.
+We’re going to start by splitting the dataset based on the wine type — white and red. For this analysis, we’ll keep things simple and focus only on white wine. If you want, you can run a similar analysis later for red wine by following the same steps.
 
 ```{r}
 white_wine <- subset(wine_clean, type == "white")
 ```
 
-Dodatkowo usuniemy kolumny tekstowe, ponieważ tylko kolumny z danymi numerycznymi będą nam potrzebne do dalszej analizy.
+Next, we’ll drop any text-based columns since we’re only interested in working with numerical data for this part of the project.
 
 ```{r}
 white_numeric <- white_wine[sapply(white_wine, is.numeric)]
 ```
 
-Stworzymy teraz zmienne pomocnicze, które pomogą nam podzielić zbiór danych na 3 podzbiory.
+Now let’s create a few helper variables that’ll make it easier to divide the dataset into three separate subsets.
 
 ```{r}
 N <- nrow(white_numeric)
 I <- (1:N)
 ```
 
-Teraz losujemy indeksy.
+Time to randomly generate the indexes for the split.
 
 ```{r}
 set.seed(300)
@@ -112,7 +112,7 @@ I_v <- sample(setdiff(I, I_l), size = round(N/4)) #25% danych
 I_t <- setdiff(setdiff(I, I_l), I_v) #25% danych
 ```
 
-Przypiszmy im konkretne dane, dzieląc nasz wyjściowy zbiór danych na 3 podzbiory: próbę uczącą, walidacyjną oraz testową o udziale procentowym, odpowiednio, 50%, 25% oraz 25% danych wyjściowych.
+We’ll use those indexes to create three data subsets: a training set, a validation set, and a test set — with 50%, 25%, and 25% of the data, respectively.
 
 ```{r}
 lrn <- white_numeric[I_l,] #próba ucząca
@@ -120,39 +120,40 @@ val <- white_numeric[I_v,] #próba walidacyjna
 tst <- white_numeric[I_t,] #próba testowa
 ```
 
-W ten sposób podzieliliśmy zbiór danych na trzy podzbiory, które będą nam pomocne do dalszej analizy.
+And just like that, we’ve split our data into three parts — all set for the next steps in the analysis.
 
-### 2.2 Korelacja zmiennych
+### 2.2 Variable Correlation
 
-Zanim utworzymy model regresji liniowej, zobaczmy jak prezentuje się wykres korelacji poszczególnych zmiennych w naszej próbie uczącej.
+Before jumping into building a linear regression model, let’s first take a look at the correlation heatmap for the variables in our training set.
 
 ```{r}
 white_matrix <- cor(lrn)
 corrplot(white_matrix, type = "lower")
 ```
-*Korelacja* określa wzajemne powiązanie między wybranymi zmiennymi. Wyrazem liczbowym korelacji jest współczynnik korelacji (R Pearsona) zawierający się w przedziale [-1,1].
 
-Wartość dodatnia korelacji oznacza, że wraz ze wzrostem jednej cechy, następuje wzrost drugiej. Wartość ujemna natomiast określa, że wraz ze wzrostem jednej, następuje spadek drugiej cechy. W takim razie wartości najbliżej krańców przedziału wskazują największe korelacje. Z drugiej strony wartości bliżej zera wskazują na brak powiązania zmiennych.
+*Correlation* tells us how two variables move together. The Pearson correlation coefficient (which ranges from -1 to 1) is a handy number that shows us the strength and direction of the relationship.
 
-Widzimy, że najbardziej skorelowaną zmienną ze zmienną ‘quality’, jest ‘alcohol’ oraz ‘density’, gdzie są to zmienne odpowiednio skorelowane dodatnio oraz ujemnie.
+A positive value means both variables tend to increase together, while a negative value means that as one goes up, the other tends to go down. The closer the value is to either -1 or 1, the stronger the relationship. If it’s closer to 0, it usually means there’s not much of a connection.
 
-Warto też zauważyć, że mocną wzajemną korelację wykazują zmienne ‘density’ i ‘residual.sugar’ oraz zmienne ‘alcohol’ i ‘density’. Mając na uwadze te obserwacje, stworzymy modele bez ‘residual.sugar’ i ‘alcohol’, żeby zobaczyć, jakie wyniki wtedy dostaniemy.
+From the plot, we can see that ‘alcohol’ and ‘density’ show the strongest relationships with wine ‘quality’ — alcohol is positively correlated, and density is negatively correlated.
 
-Zastosujemy również *metodę głównych składowych (PCA)*, żeby porównać oba podejścia.
+It’s also worth noting that ‘density’ is strongly tied to ‘residual sugar’, and there’s also a clear link between ‘alcohol’ and ‘density’. Based on that, we’ll try building models that exclude either ‘residual sugar’ or ‘alcohol’ (or both) to see how things change.
 
-*Metoda głównych składowych (PCA)* polega na transformacji oryginalnego zbioru zmiennych na nowy zestaw nieskorelowanych ze sobą zmiennych, zwanych składowymi głównymi.
+We’ll also try out *Principal Component Analysis (PCA)* to compare this approach with standard regression.
 
-## 3. Modele regresji liniowej
-### 3.1. Modele podstawowe
+*PCA* is a technique that transforms the original variables into a new set of uncorrelated variables (called principal components), which can make our models cleaner and sometimes more effective.
 
-Stworzymy modele regresji liniowej zmiennej ‘quality’ względem, odpowiednio:
+## 3. Linear Regression Models
+### 3.1. Basic Models
 
-- wszystkich zmiennych występujących w próbce uczącej (full),
-- wszystkich zmiennych występujących w próbce uczącej z wyrzuceniem zmiennej ‘residual.sugar’ (no sugar),
-- wszystkich zmiennych występujących w próbce uczącej z wyrzuceniem zmiennej ‘alcohol’ (no alcohol),
-- wszystkich zmiennych występujących w próbce uczącej z wyrzuceniem zmiennych ‘residual.sugar’ oraz ‘alcohol’ (no sugar, no alcohol).
+We’re going to build several linear regression models where we try to predict wine ‘quality’ using different sets of features:
 
-Tworzymy w tym celu funkcję, żeby zautomatyzować ten proces.
+- Full model: uses all variables from the training set.
+- No sugar: drops the ‘residual sugar’ variable.
+- No alcohol: drops the ‘alcohol’ variable.
+- No sugar & no alcohol: drops both ‘residual sugar’ and ‘alcohol’.
+
+To make our lives easier, we’ll create a function that builds each of these models for us.
 
 ```{r}
 models <<- list()
@@ -171,7 +172,7 @@ add_model('no alcohol',           lm(quality ~ .                  - alcohol, dat
 add_model('no sugar, no alcohol', lm(quality ~ . - residual.sugar - alcohol, data = lrn), FALSE)
 ```
 
-Poniżej wyświetlamy podsumowanie każdego modelu w podanej wyżej kolejności.
+Then we’ll display a summary for each model, in the order listed above.
 
 ```{r}
 for(i in 1:countM){
@@ -180,18 +181,18 @@ for(i in 1:countM){
 }
 ```
 
-Już na pierwszy rzut oka widać, że ostatni model nie jest w żaden sposób konkurencyjny względem reszty modeli, biorąc pod uwagę chociażby *skorygowany współczynnik determinacji*, który jest nieporównywalnie mniejszy w stosunku do reszty modeli. Jednak w celu zweryfikowania, czy modele mniejsze są adekwatne, posłużymy się testem ANOVA.
+Just by glancing at the summaries, it’s pretty obvious that the last model (the one without both sugar and alcohol) performs the worst — especially when you look at the adjusted R-squared, which is way lower than in the other models. To double-check whether the smaller models are valid, we’ll run an ANOVA test.
 
-Jak chodzi o interpretację *skorygowanego współczynnika determinacji*, to przyjmuje się, że wartości bliżej zera oznacza model, który nie ma wartości predykcyjnej.
+As a quick reminder: adjusted R-squared tells us how well the model explains the data. Values closer to zero mean the model doesn’t do a great job.
 
 #### 3.1.1 ANOVA
 
-*ANOVA*, Analiza wariancji to rodzina modeli statystycznych i powiązanych z nimi metod estymacji i wnioskowania wykorzystywanych do analizy różnic pomiędzy średnimi w różnych populacjach, np. w zależności od jednego lub wielu działających równoczeeśnie czynników. W najprostszej formie ANOVA stanowi test statystyczny sprawdzający czy dwie lub więcej średnich w populacjach jest sobie równych.
+ANOVA (Analysis of Variance) is a statistical method used to compare means across different groups — basically, it helps us see if the differences between models are statistically significant. It can tell us if one model is actually better than another or if the differences are just noise.
 
-Nasz test statystyczny ma postać:
+Here’s the hypothesis setup for our test:
 
-- H<sub>0</sub>: mniejszy model jest adekwatny,
-- H<sub>1</sub>: mniejszy model nie jest adekwatny.
+- H<sub>0</sub>: The smaller model is good enough.
+- H<sub>1</sub>: The smaller model doesn’t fit well.
 
 ```{r}
 for(i in 2:countM){
@@ -200,13 +201,13 @@ for(i in 2:countM){
 }
 ```
 
-Widzimy stąd, że na poziomie istotności α=0.05 jesteśmy w stanie odrzucić hipotezę H<sub>0</sub>. Oznacza to, że żaden z modeli powstałych przez wyrzucenie zmiennych mocno skorelowanych z density nie jest adekwatny.
+From the test results, at a significance level of α = 0.05, we can reject H₀ — meaning the smaller models (where we removed variables strongly correlated with density) don’t perform well enough.
 
-#### 3.1.2. Metoda wstecznej eliminacji i ANOVA
+#### 3.1.2. Backward Elimination + ANOVA
 
-W tym podrozdziale zastosujemy *metodę wstecznej eliminacji*. Polega ona na kolejnym wyrzucaniu zmiennych, które są najmniej istotne w modelu. Dzięki temu dostaniemy nowe modele. które posłużą nam do dalszej analizy.
+Now let’s try backward elimination. This method involves gradually removing the least important variables from the model, one at a time. The goal is to end up with a simpler model that still performs well.
 
-Zaznaczmy, że będziemy wyrzucać zmienne z pierwszego modelu, czyli z modelu regresji liniowej zmiennej ‘quality’ względem wszystkich zmiennych występujących w próbce uczącej.
+We’ll start with the full model (the one with all variables), and begin eliminating features step by step.
 
 ```{r}
 elim <- add_model('no acid', lm(quality ~ . - citric.acid, data = lrn), FALSE)
@@ -217,7 +218,7 @@ anova(get_model(1), get_model(countM))
 summary(get_model(countM))
 ```
 
-Przed wyświetleniem podsumowania zastosowaliśmy od razu test ANOVA, żeby zweryfikować, czy mniejszy model jest adekwatny. Na poziomie istotności α = 0,05 nie jesteśmy w stanie odrzucić hipotezy H<sub>0</sub>.
+After each removal, we’ll use ANOVA to check if the simpler model still holds up. At a significance level of *α = 0.05*, we found that we can’t reject the null hypothesis — which means the simplified models are still acceptable.
 
 ```{r}
 add_model('no acid, no chlorides', lm(quality ~ . - citric.acid - chlorides, data = lrn), FALSE)
@@ -237,7 +238,7 @@ anova(get_model(1), get_model(countM))
 summary(get_model(countM))
 ```
 
-Podobna sytuacja występuje w dwóch kolejnych modelach. Nie jesteśmy w stanie już dalej odrzucać zmiennych, ponieważ na poziomie istotności α = 0.05 kolejne zmienne są istotne, więc usuwanie ich nie jest sensowne.
+In the next couple of models, the same thing happens. At this point, the remaining variables are statistically significant, so it doesn’t make sense to remove any more — we’d just end up weakening the model.
 
 ### 3.2. Analiza składowych głównych
 
