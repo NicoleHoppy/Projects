@@ -422,6 +422,10 @@ for(i in 1:cook_base){
 mtext("Odległość Cooka", side=3, outer=TRUE, line=-3)
 ```
 
+<p align="center">
+<img src="images/image24.png" alt="Figure 24" width = 1000 />
+</p>
+
 Looking at the plots, we see that the ‘no sugar’, ‘no alcohol’, and ‘no sugar, no alcohol’ models don’t contain any outliers — all Cook’s distances are below 1. Other models do contain outliers, so we automatically rebuild those models after removing the influential points. In each case, no more than one outlier was detected.
 
 #### 3.4.2. Influential Observations
@@ -446,6 +450,14 @@ leverages <- mapply(function(index){
   }, 1:countM)
 ```
 
+<p align="center">
+<img src="images/image25.png" alt="Figure 25" width = 1000 />
+</p>
+
+<p align="center">
+<img src="images/image26.png" alt="Figure 26" width = 1000 />
+</p>
+
 After removing outliers, the resulting models have much cleaner plots. However, the visuals themselves aren’t particularly informative on their own — so we’ll compute the percentage of influential observations for each model and present the results in a table.
 
 
@@ -457,6 +469,10 @@ data.frame(names = mapply(get_name, 1:countM),
                            paste(round(sum( ifelse(lev > 2 * sum(lev) / nrow(model$model), 1, 0)) / nrow(model$model) * 100, 2), '%')
                          }, 1:countM))
 ```
+
+<p align="center">
+<img src="images/image27.png" alt="Figure 27" width = 1000 />
+</p>
 
 There’s a clear difference in how these influential observations are distributed across the various models.
 
