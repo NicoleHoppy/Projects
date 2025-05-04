@@ -33,7 +33,7 @@ unique(wine$type)
 ```
 
 <p align="center">
-<img src="images/image1.png" alt="Figure 1" width = 600 />
+<img src="images/image1.png" alt="Figure 1" width = 1000 />
 </p>
 
 From the command above, we can see that the dataset includes information on two wine types: red and white.
