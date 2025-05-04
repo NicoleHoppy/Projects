@@ -1,4 +1,4 @@
-# Project: Sales Dashboard - Superstore Dataset
+# Project: Power BI - Sales Dashboard - Superstore Dataset
 
 ## 1. Goal
 

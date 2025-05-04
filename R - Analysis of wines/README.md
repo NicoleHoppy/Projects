@@ -1,12 +1,12 @@
 ## 1. Analysis of wines
 
-The dataset used for the following analysis comes from kaggle.com. It contains data of both red and white variants of "Vinho Verde" wine, originating from northern Portugal.
+The dataset we’ll be working with comes from [kaggle.com](https://www.kaggle.com/datasets/shelvigarg/wine-quality-dataset/data) and includes info on both red and white "Vinho Verde" wines — a variety from northern Portugal.
 
-The purpose of this analysis is to apply linear regression.
+In this project, we’re going to explore how well *linear regression* can model the data.
 
-*Linear regression* is a statistical method used to examine the relationship between one dependent variable and one or more independent variables. It involves attempting to fit a line to the data in order to understand the nature of the relationship between them.
+*Linear regression* is basically a way to figure out how one variable (like wine quality) is influenced by others (like acidity, alcohol content, etc.). We try to draw a line through the data points that best captures the trend or relationship between them.
 
-First, we will load the necessary libraries so that the functions used in the project work correctly.
+But before we dive into any analysis, let’s load up the necessary libraries so that everything runs smoothly.
 
 ```{r,message = FALSE, warning = FALSE}
 library(car)
@@ -19,140 +19,145 @@ library(nortest)
 library(RColorBrewer)
 ```
 
-## 2. Dane - ich struktura oraz klasyfikacja
+## 2. The Data – Structure and Classification
 
-Załadujmy plik winequalityN.csv oraz prześledźmy jego strukturę danych.
-
-Załadujmy plik winequalityN.csv oraz prześledźmy jego strukturę danych.
+Let's load the winequalityN.csv file and take a quick look at the structure of the dataset.
 
 ```{r}
 wine <- read.csv("C:\\Users\\Nikola\\Documents\\Nikola Chmielewska\\R\\Datasets\\winequalityN.csv")
 str(wine)
 ```
+
 ```{r}
 unique(wine$type)
 ```
 
-Na podstawie powyższej komendy widzimy, że zbiór danych zawiera również informacje o wariancie wina: czerwonym i białym.
+<p align="center">
+<img src="images/image1.png" alt="Figure 1" width = 600 />
+</p>
 
-Dokonajmy jeszcze objaśnienia zmiennych występujących w zbiorze danych.
+From the command above, we can see that the dataset includes information on two wine types: red and white.
 
-| Nazwa | Opis | 
+Now, let’s break down the variables included in the dataset to better understand what we’re working with:
+
+| Name | Description | 
 |:--------|:--------|
-| type | rodzaj wina (białe, czerwone) |
-| fixed.acidity | stała kwasowość |
-| volatile acidity | zmienna kwasowość |
-| citric acid | kwas cytrynowy |
-| residual sugar | resztowy cukier |
-| chlorides |	chlorki |
-| free sulfur dioxide | 	wolny dwutlenek siarki |
-| total sulfur dioxide | 	całkowity dwutlenek siarki |
-| density |	gęstość |
-| pH – potential of hydrogen | współczynnik kwasowości/zasadowości pH |
-| sulphates | siarczyny |
-| alcohol | alkohol |
-| quality |	jakość |
+| type | Type of wine (white or red) |
+| fixed.acidity |	Fixed acidity |
+| volatile acidity | Volatile acidity |
+| citric acid |	Citric acid |
+| residual sugar | Residual sugar |
+| chlorides |	Chlorides |
+| free sulfur dioxide | Free sulfur dioxide |
+| total sulfur dioxide | Total sulfur dioxide |
+| density |	Density |
+| pH – potential of hydrogen |	Acidity/basicity (pH level) |
+| sulphates | Sulphates |
+| alcohol | Alcohol content |
+| quality |	Wine quality rating |
 
-Oraz, aby lepiej zrozumieć dane, zobaczmy ich podsumowanie:
+To get a better feel for the data, let’s look at a summary:
 
 ```{r}
 summary(wine)
 ```
 
-Sprawdźmy jeszcze, czy w zbiorze wszystkie dane są podane:
+Before diving in deeper, let’s also check whether there are any missing values in the dataset.
 
 ```{r}
 (sapply(wine, function(x) {sum(is.na(x))}))
 ```
-Jak widać powyżej, nasza tabela zawiera wartości NA. Usuniemy zatem wiersze, które nie posiadają danych, ponieważ w kontekście całego zbioru danych jest to marginalna ilość. Robimy to, ponieważ brak danych może obniżyć jakość późniejszej analizy danych.
+
+As we can see, there are some NA values in the table. Since they represent only a small portion of the data, we’ll go ahead and drop those rows. Missing data could affect the quality of our analysis later on, so it’s better to clean it up now.
 
 ```{r}
-wine_clean <- na.omit(wine) #usuwa wiersze zawierające wartości NA
+wine_clean <- na.omit(wine) #deleting rows containing NA values
 ```
 
-Wyświetlmy jeszcze raz nasz nowy zbiór danych z usuniętymi wartościami NA.
+Once we remove the rows with missing values, let’s take another look at our updated dataset.
 
 ```{r}
 (sapply(wine_clean, function(x) {sum(is.na(x))}))
 ```
 
-Jak widzimy, w tej chwili żadna zmienna nie jest obarczona brakiem danych, więc nasz zbiór danych jest gotowy do obróbki.
+Now everything looks good — no missing data, so our dataset is ready to go!
 
-Jednocześnie w powyższym zestawie danych zmienną zależną jest atrybut quality, a więc ocena jakości wina. Pozostałe zmienne są zmiennymi niezależnymi, ponieważ wpływają one na końcową ocenę wina; są to również zmienne ilościowe. Natomiast zmienną objaśnianą ‘quality’ można potraktować zarówno jako zmienną ilościową oraz jako zmienną nominalną o uporządkowanych kategoriach (jakościową). 
+In this dataset, the variable we’re trying to predict is quality, which represents the wine’s rating. All the other variables are independent (predictor) variables, and they’re numerical in nature. As for quality, it can actually be seen in two ways: either as a continuous numeric variable or as an ordinal categorical variable (since it reflects a quality rating).
 
-W niniejszej pracy zmienną 'quality' potraktujemy jako zmienną ilościową, rozważając modele regresji liniowej. Jednak podczas tworzenia modelu proporcjonalnych szans, zmienną ‘quality’ potraktujemy jako zmienną jakościową. Warto w tym miejscu zaznaczyć, że w celu weryfikacji hipotez będziemy zakładać poziom istotności *α = 0,05*.
+In our analysis, we’ll first treat quality as a numeric variable when applying linear regression. But later on, when we build a proportional odds model, we’ll treat it as an ordinal categorical variable. Also, for hypothesis testing, we’ll be using a significance level of α = 0.05.
 
-### 2.1 Podział zbioru danych
+### 2.1 Splitting the Dataset
 
-Podzielimy nasz zbiór danych na podstawie wariantu wina - białe i czerwone. W niniejszej analizie skupimy się jedynie na przeanalizowaniu danych dot. białego wina. Dla czerwonego wariantu wina można zrobić osobną analizę, przechodząc analogicznie przez kroki, jakie wykonaliśmy dla białego wina.
+We’re going to start by splitting the dataset based on the wine type — white and red. For this analysis, we’ll keep things simple and focus only on white wine. If you want, you can run a similar analysis later for red wine by following the same steps.
 
 ```{r}
 white_wine <- subset(wine_clean, type == "white")
 ```
 
-Dodatkowo usuniemy kolumny tekstowe, ponieważ tylko kolumny z danymi numerycznymi będą nam potrzebne do dalszej analizy.
+Next, we’ll drop any text-based columns since we’re only interested in working with numerical data for this part of the project.
 
 ```{r}
 white_numeric <- white_wine[sapply(white_wine, is.numeric)]
 ```
 
-Stworzymy teraz zmienne pomocnicze, które pomogą nam podzielić zbiór danych na 3 podzbiory.
+Now let’s create a few helper variables that’ll make it easier to divide the dataset into three separate subsets.
 
 ```{r}
 N <- nrow(white_numeric)
 I <- (1:N)
 ```
 
-Teraz losujemy indeksy.
+Time to randomly generate the indexes for the split.
 
 ```{r}
 set.seed(300)
-I_l <- sample.int(N, size = round(N/2)) #50% danych
-I_v <- sample(setdiff(I, I_l), size = round(N/4)) #25% danych
-I_t <- setdiff(setdiff(I, I_l), I_v) #25% danych
+I_l <- sample.int(N, size = round(N/2)) #50% of the data
+I_v <- sample(setdiff(I, I_l), size = round(N/4)) #25% of the data
+I_t <- setdiff(setdiff(I, I_l), I_v) #25% of the data
 ```
 
-Przypiszmy im konkretne dane, dzieląc nasz wyjściowy zbiór danych na 3 podzbiory: próbę uczącą, walidacyjną oraz testową o udziale procentowym, odpowiednio, 50%, 25% oraz 25% danych wyjściowych.
+We’ll use those indexes to create three data subsets: a training set, a validation set, and a test set — with 50%, 25%, and 25% of the data, respectively.
 
 ```{r}
-lrn <- white_numeric[I_l,] #próba ucząca
-val <- white_numeric[I_v,] #próba walidacyjna
-tst <- white_numeric[I_t,] #próba testowa
+lrn <- white_numeric[I_l,] #training set
+val <- white_numeric[I_v,] #validation set
+tst <- white_numeric[I_t,] #test set
 ```
 
-W ten sposób podzieliliśmy zbiór danych na trzy podzbiory, które będą nam pomocne do dalszej analizy.
+And just like that, we’ve split our data into three parts — all set for the next steps in the analysis.
 
-### 2.2 Korelacja zmiennych
+### 2.2 Variable Correlation
 
-Zanim utworzymy model regresji liniowej, zobaczmy jak prezentuje się wykres korelacji poszczególnych zmiennych w naszej próbie uczącej.
+Before jumping into building a linear regression model, let’s first take a look at the correlation heatmap for the variables in our training set.
 
 ```{r}
 white_matrix <- cor(lrn)
 corrplot(white_matrix, type = "lower")
 ```
-*Korelacja* określa wzajemne powiązanie między wybranymi zmiennymi. Wyrazem liczbowym korelacji jest współczynnik korelacji (R Pearsona) zawierający się w przedziale [-1,1].
 
-Wartość dodatnia korelacji oznacza, że wraz ze wzrostem jednej cechy, następuje wzrost drugiej. Wartość ujemna natomiast określa, że wraz ze wzrostem jednej, następuje spadek drugiej cechy. W takim razie wartości najbliżej krańców przedziału wskazują największe korelacje. Z drugiej strony wartości bliżej zera wskazują na brak powiązania zmiennych.
+*Correlation* tells us how two variables move together. The Pearson correlation coefficient (which ranges from -1 to 1) is a handy number that shows us the strength and direction of the relationship.
 
-Widzimy, że najbardziej skorelowaną zmienną ze zmienną ‘quality’, jest ‘alcohol’ oraz ‘density’, gdzie są to zmienne odpowiednio skorelowane dodatnio oraz ujemnie.
+A positive value means both variables tend to increase together, while a negative value means that as one goes up, the other tends to go down. The closer the value is to either -1 or 1, the stronger the relationship. If it’s closer to 0, it usually means there’s not much of a connection.
 
-Warto też zauważyć, że mocną wzajemną korelację wykazują zmienne ‘density’ i ‘residual.sugar’ oraz zmienne ‘alcohol’ i ‘density’. Mając na uwadze te obserwacje, stworzymy modele bez ‘residual.sugar’ i ‘alcohol’, żeby zobaczyć, jakie wyniki wtedy dostaniemy.
+From the plot, we can see that ‘alcohol’ and ‘density’ show the strongest relationships with wine ‘quality’ — alcohol is positively correlated, and density is negatively correlated.
 
-Zastosujemy również *metodę głównych składowych (PCA)*, żeby porównać oba podejścia.
+It’s also worth noting that ‘density’ is strongly tied to ‘residual sugar’, and there’s also a clear link between ‘alcohol’ and ‘density’. Based on that, we’ll try building models that exclude either ‘residual sugar’ or ‘alcohol’ (or both) to see how things change.
 
-*Metoda głównych składowych (PCA)* polega na transformacji oryginalnego zbioru zmiennych na nowy zestaw nieskorelowanych ze sobą zmiennych, zwanych składowymi głównymi.
+We’ll also try out *Principal Component Analysis (PCA)* to compare this approach with standard regression.
 
-## 3. Modele regresji liniowej
-### 3.1. Modele podstawowe
+*PCA* is a technique that transforms the original variables into a new set of uncorrelated variables (called principal components), which can make our models cleaner and sometimes more effective.
 
-Stworzymy modele regresji liniowej zmiennej ‘quality’ względem, odpowiednio:
+## 3. Linear Regression Models
+### 3.1. Basic Models
 
-- wszystkich zmiennych występujących w próbce uczącej (full),
-- wszystkich zmiennych występujących w próbce uczącej z wyrzuceniem zmiennej ‘residual.sugar’ (no sugar),
-- wszystkich zmiennych występujących w próbce uczącej z wyrzuceniem zmiennej ‘alcohol’ (no alcohol),
-- wszystkich zmiennych występujących w próbce uczącej z wyrzuceniem zmiennych ‘residual.sugar’ oraz ‘alcohol’ (no sugar, no alcohol).
+We’re going to build several linear regression models where we try to predict wine ‘quality’ using different sets of features:
 
-Tworzymy w tym celu funkcję, żeby zautomatyzować ten proces.
+- Full model: uses all variables from the training set.
+- No sugar: drops the ‘residual sugar’ variable.
+- No alcohol: drops the ‘alcohol’ variable.
+- No sugar & no alcohol: drops both ‘residual sugar’ and ‘alcohol’.
+
+To make our lives easier, we’ll create a function that builds each of these models for us.
 
 ```{r}
 models <<- list()
@@ -171,7 +176,7 @@ add_model('no alcohol',           lm(quality ~ .                  - alcohol, dat
 add_model('no sugar, no alcohol', lm(quality ~ . - residual.sugar - alcohol, data = lrn), FALSE)
 ```
 
-Poniżej wyświetlamy podsumowanie każdego modelu w podanej wyżej kolejności.
+Then we’ll display a summary for each model, in the order listed above.
 
 ```{r}
 for(i in 1:countM){
@@ -180,18 +185,18 @@ for(i in 1:countM){
 }
 ```
 
-Już na pierwszy rzut oka widać, że ostatni model nie jest w żaden sposób konkurencyjny względem reszty modeli, biorąc pod uwagę chociażby *skorygowany współczynnik determinacji*, który jest nieporównywalnie mniejszy w stosunku do reszty modeli. Jednak w celu zweryfikowania, czy modele mniejsze są adekwatne, posłużymy się testem ANOVA.
+Just by glancing at the summaries, it’s pretty obvious that the last model (the one without both sugar and alcohol) performs the worst — especially when you look at the adjusted R-squared, which is way lower than in the other models. To double-check whether the smaller models are valid, we’ll run an ANOVA test.
 
-Jak chodzi o interpretację *skorygowanego współczynnika determinacji*, to przyjmuje się, że wartości bliżej zera oznacza model, który nie ma wartości predykcyjnej.
+As a quick reminder: adjusted R-squared tells us how well the model explains the data. Values closer to zero mean the model doesn’t do a great job.
 
 #### 3.1.1 ANOVA
 
-*ANOVA*, Analiza wariancji to rodzina modeli statystycznych i powiązanych z nimi metod estymacji i wnioskowania wykorzystywanych do analizy różnic pomiędzy średnimi w różnych populacjach, np. w zależności od jednego lub wielu działających równoczeeśnie czynników. W najprostszej formie ANOVA stanowi test statystyczny sprawdzający czy dwie lub więcej średnich w populacjach jest sobie równych.
+ANOVA (Analysis of Variance) is a statistical method used to compare means across different groups — basically, it helps us see if the differences between models are statistically significant. It can tell us if one model is actually better than another or if the differences are just noise.
 
-Nasz test statystyczny ma postać:
+Here’s the hypothesis setup for our test:
 
-- H<sub>0</sub>: mniejszy model jest adekwatny,
-- H<sub>1</sub>: mniejszy model nie jest adekwatny.
+- H<sub>0</sub>: The smaller model is good enough.
+- H<sub>1</sub>: The smaller model doesn’t fit well.
 
 ```{r}
 for(i in 2:countM){
@@ -200,13 +205,13 @@ for(i in 2:countM){
 }
 ```
 
-Widzimy stąd, że na poziomie istotności α=0.05 jesteśmy w stanie odrzucić hipotezę H<sub>0</sub>. Oznacza to, że żaden z modeli powstałych przez wyrzucenie zmiennych mocno skorelowanych z density nie jest adekwatny.
+From the test results, at a significance level of α = 0.05, we can reject H₀ — meaning the smaller models (where we removed variables strongly correlated with density) don’t perform well enough.
 
-#### 3.1.2. Metoda wstecznej eliminacji i ANOVA
+#### 3.1.2. Backward Elimination + ANOVA
 
-W tym podrozdziale zastosujemy *metodę wstecznej eliminacji*. Polega ona na kolejnym wyrzucaniu zmiennych, które są najmniej istotne w modelu. Dzięki temu dostaniemy nowe modele. które posłużą nam do dalszej analizy.
+Now let’s try backward elimination. This method involves gradually removing the least important variables from the model, one at a time. The goal is to end up with a simpler model that still performs well.
 
-Zaznaczmy, że będziemy wyrzucać zmienne z pierwszego modelu, czyli z modelu regresji liniowej zmiennej ‘quality’ względem wszystkich zmiennych występujących w próbce uczącej.
+We’ll start with the full model (the one with all variables), and begin eliminating features step by step.
 
 ```{r}
 elim <- add_model('no acid', lm(quality ~ . - citric.acid, data = lrn), FALSE)
@@ -217,7 +222,7 @@ anova(get_model(1), get_model(countM))
 summary(get_model(countM))
 ```
 
-Przed wyświetleniem podsumowania zastosowaliśmy od razu test ANOVA, żeby zweryfikować, czy mniejszy model jest adekwatny. Na poziomie istotności α = 0,05 nie jesteśmy w stanie odrzucić hipotezy H<sub>0</sub>.
+After each removal, we’ll use ANOVA to check if the simpler model still holds up. At a significance level of *α = 0.05*, we found that we can’t reject the null hypothesis — which means the simplified models are still acceptable.
 
 ```{r}
 add_model('no acid, no chlorides', lm(quality ~ . - citric.acid - chlorides, data = lrn), FALSE)
@@ -237,11 +242,11 @@ anova(get_model(1), get_model(countM))
 summary(get_model(countM))
 ```
 
-Podobna sytuacja występuje w dwóch kolejnych modelach. Nie jesteśmy w stanie już dalej odrzucać zmiennych, ponieważ na poziomie istotności α = 0.05 kolejne zmienne są istotne, więc usuwanie ich nie jest sensowne.
+In the next couple of models, the same thing happens. At this point, the remaining variables are statistically significant, so it doesn’t make sense to remove any more — we’d just end up weakening the model.
 
-### 3.2. Analiza składowych głównych
+### 3.2. Principal Component Analysis (PCA)
 
-W celu zbadania innego podejścia do tworzenia modelów wykorzystamy metodę składowych głównych.
+To explore an alternative modeling approach, we’ll now use Principal Component Analysis (PCA).
 
 ```{r}
 par(mfrow = c(1, 2))
@@ -257,11 +262,11 @@ pca_data <- data.frame(quality = lrn$quality, pca$x)
 corrplot(cor(pca_data), type = "lower")
 ```
 
-Jak widać na wykresie dwie zmienne, które mają najmniejsze znaczenie są poniżej poziomu istotności α = 0,05. Z wykresu obok odczytujemy także, że udało nam się utworzyć zbiór danych, w którym wszystkie zmienne (poza ‘quality’) są niezależne. Zastosujemy także tutaj metodę wstecznej eliminacji, żeby pozbyć się zmiennych, które są nieistotne w tym modelu.
+Looking at the plot, we can see that two of the components fall below the significance threshold of *α = 0.05*, suggesting they don’t contribute much to the model. The adjacent chart also confirms that all the new variables (except ‘quality’) are uncorrelated — which is one of the key benefits of PCA. We'll also apply backward elimination here to remove those components that don’t seem to matter much.
 
-### 3.3. Metoda wstecznej eliminacji i ANOVA
+### 3.3. Backward Elimination with PCA and ANOVA
 
-Na początek tworzymy model PCA, z którego będziemy wyrzucać zmienne oraz od razu sprawdzimy, czy mniejsze modele są adekwatne względem tego modelu.
+We’ll start by building a PCA-based model and gradually eliminate components one by one — checking at each step whether the reduced model still holds up.
 
 ```{r}
 pca_base <- add_model('pca', lm(quality ~ ., data = pca_data), TRUE)
@@ -277,7 +282,7 @@ anova(get_model(pca_base), get_model(countM))
 summary(get_model(countM))
 ```
 
-Jak widać model z wyrzuconym składnikiem ‘PC6’ jest jak najbardziej adekwatny. Spróbujmy wyrzucić jeszcze jeden składnik, tym razem ‘PC7’.
+After removing the component ‘PC6’, the model still performs well — in fact, we can’t reject the null hypothesis at the *α = 0.05* level, meaning the reduced model is adequate. Next, we try removing ‘PC7’ as well.
 
 ```{r}
 add_model('pca no pc6, no pc7', lm(quality ~ . - PC6 - PC7, data = pca_data), TRUE)
@@ -288,17 +293,19 @@ anova(get_model(pca_base), get_model(countM))
 summary(get_model(countM))
 ```
 
-Wynika stąd, że ten model także jest adekwatny, a przynajmniej wiemy, że nie jesteśmy w stanie odrzucić hipotezy H<sub>0</sub> na poziomie istotności α = 0,05. Dalsze wyrzucanie zmiennych nie ma sensu, ponieważ reszta zmiennych jest jak najbardziej istotna.
+Again, the model remains adequate. Since we’re still unable to reject null hypothesis, we conclude that both PC6 and PC7 are unnecessary. But beyond this point, removing more components doesn’t make sense — the remaining ones are clearly significant.
 
-## 4. Diagnostyka
+## 4. Model Diagnostics
 
-Przyjdziemy teraz do diagnostyki naszych nowo utworzonych modeli. Przyjrzymy się *statystyce Cooka (odległość Cooka)*, żeby wykryć obserwacje odstające, pozbyć się ich i stąd dostaniemy nowe modele. Dodatkowo policzymy procentowy udział obserwacji wpływowych. Spojrzymy też na wykresy resztowe naszych modeli i spróbujemy wyciągnąć wnioski.
+Now it’s time to dive into the diagnostics for our models. We’ll look at Cook’s distance to identify and remove any outliers, then rebuild the models without those points. We’ll also calculate what percentage of our data points are considered influential and inspect residual plots for further insight.
 
-Krótkie wyjaśnienie *odległość Cooka* to miara wykorzystywana w analizie regresji, służąca do wykrywania obserwacji odstających i oszacowania ich wpływu na cały model statystyczny. 
+A quick recap: *Cook’s distance* is a measure used in regression analysis to identify observations that have a large influence on the fitted model.
 
-### 4.1. Obserwacje odstające
+### 4.1. Outlier Detection
 
-Tworzymy pomocniczą funkcję, żeby maksymalnie zautomatyzować tworzenie odległości Cooka oraz powstawanie wykresów. Pamiętamy, że za obserwację wpływową w sensie odległości Cooka uchodzą obserwacje, dla których odległość jest nie mniejsza od 1.
+We’ll create a helper function to automate the process of computing Cook’s distance and generating the necessary plots.
+
+As a rule of thumb, any observation with a Cook’s distance greater than or equal to 1 is considered influential.
 
 ```{r}
 cook_base = countM
@@ -327,11 +334,13 @@ for(i in 1:cook_base){
 mtext("Odległość Cooka", side=3, outer=TRUE, line=-3)
 ```
 
-Z powyższych wykresów jesteśmy w stanie wywnioskować, że modele ‘no sugar’, ‘no alcohol’ oraz ‘no sugar, no alcohol’ nie mają żadnych odstających obserwacji, ponieważ odległość Cooka jest mniejsza niż 1. Pozostałe modele posiadają obserwacje odstające, dlatego za pomocą funkcji, która została stworzona na początku tego podrozdziału, automatycznie stworzone zostały nowe modele z wyrzuceniem obserwacji odstającej. Warto dodać, że żaden z modeli nie posiadał więcej niż jednej obserwacji odstającej.
+Looking at the plots, we see that the ‘no sugar’, ‘no alcohol’, and ‘no sugar, no alcohol’ models don’t contain any outliers — all Cook’s distances are below 1. Other models do contain outliers, so we automatically rebuild those models after removing the influential points. In each case, no more than one outlier was detected.
 
-### 4.2. Obserwacje wpływowe
+### 4.2. Influential Observations
 
-Zajmiemy się teraz obserwacjami wpływowymi. Wyświetlimy wykresy każdego modelu wraz z linią pokazującą, od jakiego poziomu obserwacje są obserwacjami wpływowymi. W tym celu robimy funkcję, żeby po raz kolejny zautomatyzować tworzenie wykresów, ponieważ na chwilę obecną mamy ich już 17.
+Next, we’ll focus on influential points. We'll generate plots showing where the threshold lies for each model, to better visualize which observations cross the line.
+
+To handle the large number of models (we’re already up to 17), we’ll write a function that automates this step too.
 
 ```{r}
 par(mfrow = c(9, 3))
@@ -349,7 +358,8 @@ leverages <- mapply(function(index){
   }, 1:countM)
 ```
 
-Widać, że dopiero po odrzuceniu obserwacji odstających tak powstałe modele mają bardziej przejrzyste wykresy. Jednak z nich nie jesteśmy w stanie za wiele odczytać, dlatego policzymy procentowy udział obserwacji wływowych i wyświetlimy wyniki w postaci przejrzystej tabelki.
+After removing outliers, the resulting models have much cleaner plots. However, the visuals themselves aren’t particularly informative on their own — so we’ll compute the percentage of influential observations for each model and present the results in a table.
+
 
 ```{r}
 data.frame(names = mapply(get_name, 1:countM), 
@@ -360,11 +370,11 @@ data.frame(names = mapply(get_name, 1:countM),
                          }, 1:countM))
 ```
 
-Widzimy różne rozłożenie procentowe obserwacji wpływowych dla różnych modeli.
+There’s a clear difference in how these influential observations are distributed across the various models.
 
-### 4.3. Wykresy resztowe
+### 4.3. Residual Plots
 
-Spójrzmy jeszcze tylko na wykresy resztowe wszystkich modeli.
+Let’s also take a look at the residual plots for all models.
 
 ```{r}
 par(mfrow = c(ceiling(countM / 4), 4))
@@ -378,12 +388,12 @@ for(i in 1:countM){
   abline(h = 0, col = 'red')}
 ```
 
-W każdym z modeli występuje pewne odchylanie reszt od wartości dopasowanych. Widzimy, że wykresy są bardzo podobne do siebie, a wszystkie bardziej odstające punkty zostały usunięte podczas tworzenia modeli stworzonych dzięki statystyce Cooka, co widać porównując odpowiednio modele podstawowe ze zmodyfikowanymi. Jedynie wykresy modeli ‘no alcohol’ oraz ‘no sugar, no alcohol’ znacząco różnią się od reszty wykresów.
+In each model, we see some deviation of residuals from the fitted values. That said, the plots are fairly similar overall. Outliers identified earlier using Cook’s distance have already been removed, as shown by the differences between the original and updated models. Only the residual plots for ‘no alcohol’ and ‘no sugar, no alcohol’ stand out as looking quite different from the others.
 
-## 5. Poprawność założeń modeli regresji liniowej
-### 5.1. Normalność reszt
+## 5. Assumptions of Linear Regression
+### 5.1. Normality of Residuals
 
-Przyjrzyjmy się najpierw wykresom.
+First, let’s inspect the residual plots.
 
 ```{r}
 par(mfrow = c(ceiling(countM / 4), 4))
@@ -398,24 +408,24 @@ for(i in 1:countM){
 }
 ```
 
-Z wykresów widzimy, że rozkład zmiennych resztowych nie jest zupełnie normalny, ale jest to łagodne odstępstwo od założenia normalności, ponadto próbka jest duża, więc może być zignorowane. Niemniej przeprowadźmy jeszcze test statystyczny Shapiro–Wilk. 
+We can see that the residuals aren’t perfectly normally distributed — but the deviation is minor, and because we’re working with a large sample size, it’s not a major concern. Still, let’s formally test this using the Shapiro–Wilk test.
 
-Ten test ma następujące hipotezy:
+Here are the hypotheses:
 
-H<sub>0</sub>: reszty mają rozkład normalny,
+H<sub>0</sub>: Residuals are normally distributed
 
-H<sub>1</sub>: reszty nie mają rozkładu normalnego.
+H<sub>1</sub>: Residuals are not normally distributed
 
 ```{r}
 data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
            "p-value" = mapply(function(i){ shapiro.test(get_model(i)$residuals)$p.value }, 1:countM)) 
 ```
 
-Z powyższego testu wynika, że powinniśmy odrzucić hipotezę H<sub>0</sub>, czyli w żadnym modelu reszty nie mają rozkładu normalnego. Rozbieżność między testami a wykresem, może wynikać z dużej próbki, dla której niektóre testy nie są adekwatne.
+According to the test results, we must reject H₀ — suggesting that none of the models have normally distributed residuals. This may seem contradictory to what the plots showed, but large sample sizes can make even small deviations statistically significant, which is a known limitation of such tests.
 
-### 5.2. Stałość wariancji
+### 5.2. Homoscedasticity (Constant Variance)
 
-W celu zbadania stałości wariancji zrobimy wykresy zależności zmiennych resztowych od odpowiednich zmiennych dopasowanych.
+To test for constant variance, we’ll create residual-vs-fitted plots for each model.
 
 ```{r}
 par(mfrow = c(ceiling(countM / 4), 4))
@@ -430,36 +440,36 @@ for(i in 1:countM){
 }
 ```
 
-Przeprowadźmy jeszcze test Goldfeld-Quandt o stałości wariancji.
+We’ll also apply the Goldfeld–Quandt test, which formally checks for heteroscedasticity. Here are the hypotheses:
 
-H<sub>0</sub>: reszty mają stałą wariancję,
+H<sub>0</sub>: Residuals have constant variance
 
-H<sub>1</sub>: reszty nie mają stałej wariancji.
+H<sub>1</sub>: Residuals do not have constant variance
 
 ```{r}
 data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
            "p-value" = mapply(function(i){ gqtest(get_model(i))$p.value }, 1:countM)) 
 ```
 
-Widzimy, że w przypadku wszystkich modeli nie jesteśmy w stanie odrzucić hipotezy H<sub>0</sub> na poziomie istotności α = 0,05, dlatego wynika stąd, że reszty mają stałą wariancję.
+Across all models, we fail to reject H₀ at the α = 0.05 level. This suggests that the assumption of constant variance holds.
 
-### 5.3. Skorelowanie reszt
+### 5.3. Residual Independence
 
-W celu sprawdzenia, czy nasze reszty są skorelowane, posłużymy się testem Durbina-Watsona:
+To check whether residuals are correlated, we use the Durbin–Watson test. Hypotheses:
 
-H<sub>0</sub>: reszty nie są skorelowane,
-H<sub>1</sub>: istnieje korelacja reszt.
+H<sub>0</sub>: Residuals are not autocorrelated
+H<sub>1</sub>: Residuals are autocorrelated
 
 ```{r}
 data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
            "p-value" = mapply(function(i){ durbinWatsonTest(get_model(i))$p }, 1:countM)) 
 ```
 
-Na podstawie przeprowadzonego testu statystycznego, nie mamy podstaw do odrzucenia hipotezy H<sub>0</sub> o braku korelacji reszt dla każdego modelu regresji liniowej.
+Test results show no reason to reject H<sub>0</sub> — in other words, residuals appear to be uncorrelated in all our models.
 
-## 6. Współliniowość regresorów
+## 6. Multicollinearity of Predictors
 
-Aby przetestować współliniowość, posłużymy się statystyką Variance Inflation Factor.
+To assess multicollinearity, we’ll use the Variance Inflation Factor (VIF).
 
 ```{r}
 VIF = function(i){
@@ -467,13 +477,13 @@ VIF = function(i){
 }
 ```
 
-Wyliczając statystykę Variance Inflation Factor, a więc prostego testu opartego na statystyce R2, który mierzy, jaka część wariancji estymatora jest powodowana przez to, że zmienna j nie jest niezależna względem pozostałych zmiennych objaśniających w modelu regresji, jesteśmy w stanie określić współliniowość dla poszczególnych zmiennych.
+This simple test, based on R² values, tells us how much a variable’s variance is inflated due to correlations with other predictors.
 
-W każdym modelu największą miarą charakteryzują się zmienne ‘density’, ‘residual.sugar’ oraz ‘alcohol’. Możemy wywnioskować, że są to najbardziej współliniowe zmienne, natomiast nie jest to zjawisko bardzo mocno widoczne w naszym zbiorze danych. Modele bez tych parametrów są mniej współliniowe.
+In every model, the highest VIF values appear for ‘density’, ‘residual sugar’, and ‘alcohol’. These are clearly the most collinear variables — though the issue isn’t extreme across the dataset. Models that exclude these variables naturally show lower multicollinearity.
 
-## 7. Miary dopasowania
+## 7. Goodness-of-Fit Measures
 
-Przed wybraniem najlepszego modelu, spójrzmy jeszcze na miary dopasowania modelu do danych.
+Before selecting the best model, let’s examine how well each model fits the data using standard fit metrics.
 
 ```{r}
 data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
@@ -482,11 +492,11 @@ data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
            check.names = FALSE)
 ```
 
-Widzimy, że gdybyśmy mieli wybierać najlepszy model na podstawie skorygowanego współczynnika determinacji, to wybralibyśmy model ‘cook no acid, no chlorides, no totalsulf’. Jednak wybór najlepszego modelu opieramy na wyniku resztowej sumy kwadratów.
+Looking at the results, if we were to base our choice solely on the adjusted R-squared, the best model would be ‘cook no acid, no chlorides, no totalsulf’. However, our selection will be based on the Residual Sum of Squares (RSS) instead.
 
-## 8. Wybór najlepszego modelu na podstawie RSS oraz jego test
+## 8. Best Model Selection Based on RSS and Model Evaluation
 
-Stwórzmy funkcję, która pokaże odpowiednio: nazwę modelu; resztową sumę kwadratów pomiędzy obserwacjami empirycznymi z próby walidacyjnej, a przewidzianymi przez model regresji liniowej; odsetek poprawnych klasyfikacji; odsetek poprawnych klasyfikacji różniących się o co najwyżej jeden.
+We’ll create a function that returns the following for each model: the model name, the residual sum of squares between the validation sample and predicted values, the percentage of correct classifications, and the percentage of classifications within ±1 of the true value.
 
 ```{r}
 pca_val <- as.data.frame(predict(pca, newdata = val[1:11]))
@@ -521,9 +531,9 @@ for(i in 1:countM){ make_prediction(i, val, pca_val) }
 prediction_summary
 ```
 
-Poprzez utworzoną tabelę, dostrzegamy że modele o najmniejszej resztowej sumie kwadratów, a więc nasze najlepsze modele na tej podstawie, to ‘pca no pc6’ oraz ‘pca no pc6, no pc7’. Jednak model ‘pca no 6’ ma większy odsetek poprawnych klasyfikacji, dlatego to właśnie on zostanie wybrany do dalszych testów.
+From the generated table, we observe that the models with the lowest residual sum of squares — and therefore the best by this metric — are ‘pca no pc6’ and ‘pca no pc6, no pc7’. However, since ‘pca no pc6’ has a higher rate of correct classifications, we choose it as the final model for further testing.
 
-Przetestujmy teraz w takim razie nasz najlepszy model.
+Let’s now evaluate the performance of this chosen model.
 
 ```{r}
 prediction_summary = NULL
@@ -535,18 +545,18 @@ prediction_summary
 
 ```
 
-Widzimy, że nasz model nie jest wybitny, natomiast dobrze poradził sobie z próbą testową, przewidując ponad połowę poprawnych klasyfikacji. Możemy z tego wywnioskować, że jest to najlepszy utworzony przez nas model regresji liniowej, z drugiej jednak strony sama regresja liniowa jest obarczona dużym błędem w przewidywaniach.
+Although it’s not outstanding, the model performs decently on the test set, correctly predicting over half of the classifications. We can conclude that this is the best linear regression model we’ve built — but it's also clear that linear regression itself comes with considerable prediction error.
 
-## 9. Model proporcjonalnych szans
+## 9. Proportional Odds Model
 
-W celu zobrazowania zmiany zmiennej quality na zmienną jakościową utworzymy model proporcjonalnych szans:
+To adapt the quality variable into a categorical format, we’ll build a proportional odds (ordinal logistic regression) model.
 
 ```{r}
 wine1 <- white_numeric
 wine1$quality <- factor(wine1$quality)
 ```
 
-Oraz podzielimy nasz zbiór na 3 podzbiory, jak wcześniej.
+We’ll again split the data into the same three subsets as before.
 
 ```{r}
 lrn2 <- wine1[I_l,]
@@ -554,20 +564,20 @@ val2 <- wine1[I_v,]
 tst2 <- wine1[I_t,]
 ```
 
-Utworzony model wygląda następująco:
+The initial model is constructed as follows:
 
 ```{r}
 g.plr <- polr(quality ~ ., data = lrn2)
 g.plr
 ```
 
-Przyjrzyjmy się teraz jego podsumowaniu.
+Now, let’s look at the model summary.
 
 ```{r}
 summary(g.plr)
 ```
 
-Zastosujemy funkcję predict() do przewidywania wartości dla tego modelu.
+We use the predict() function to make predictions with this model.
 
 ```{r}
 pr_log1 <- predict(g.plr, val2[,1:11], type="class")
@@ -576,7 +586,7 @@ val21 <- as.numeric(val2$quality)
 pr_log11 <- as.numeric(pr_log1)
 ```
 
-Oraz obliczmy resztową sumę kwadratów.
+Then we compute the residual sum of squares.
 
 ```{r}
 sum((pr_log11-val21)^2)
@@ -588,9 +598,9 @@ Widzimy, że model jest przeciętny, więc ulepszymy go. Uprościmy model za pom
 o_lr = step(g.plr)
 ```
 
-Utworzony model ma mniej zmiennych zależnych w celu zmniejszenia AIC, która estymuje liczbę utraconych danych przez dany model. Im mniej danych model utracił, tym lepszej jest jakości. Innymi słowy AIC określa ryzyko przeszacowania oraz niedoszacowania modelu.
+The model turns out to be mediocre, so we attempt to improve it. We simplify the model using the step() function to minimize the AIC — a criterion that estimates the information lost by a model. The smaller the AIC, the better the model in terms of avoiding overfitting or underfitting.
 
-Spójrzmy teraz na podsumowanie.
+Let’s look at the summary of the reduced model.
 
 ```{r}
 summary(o_lr)
@@ -600,7 +610,7 @@ summary(o_lr)
 anova(g.plr,o_lr)
 ```
 
-Widzimy, że mniejszy model jest jak najbardziej zasadny. Policzmy resztową sumę kwadratów.
+We see that this smaller model is statistically justified. However, when we recalculate the residual sum of squares…
 
 ```{r}
 pr_log2<-predict(o_lr, val2[,1:11],type="class")
@@ -610,12 +620,12 @@ pr_log12 <- as.numeric(pr_log2)
 sum((pr_log12-val21)^2)
 ```
 
-Resztowa suma kwadratów jest większa, wiec model nie jest tak dobry jak wyjściowy, klasyfikując modele na podstawie tego kryterium, dlatego żaden z tych modeli nie jest lepszy w porównaniu z najlepszym modelem regresji liniowej.
+…it turns out to be larger than for the full model. So, based on this criterion, the simplified model is not better. In fact, neither of the proportional odds models outperform the best linear regression model we selected earlier.
 
-## 10. Podsumowanie
+## 10. Summary
 
-W projekcie utworzone zostało 17 modeli regresji liniowych oraz 2 modele proporcjonalnych szans.
+In this project, we constructed 17 linear regression models and 2 proportional odds models.
 
-Wśród wszystkich modeli najmniejszą wartość resztowej sumy kwadratów osiągnął model regresji liniowej, który został ostatecznie przetestowany dla zbioru testowego. Na jego podstawie określiliśmy, że model regresji liniowej jest całkiem dokładny, ponieważ próba testowa dała nam bardzo dobry wynik.
+Among them, the linear regression model selected for final testing produced the lowest residual sum of squares. It also performed well on the test set, correctly classifying over half of the values — indicating that, within our modeling scope, it is the most accurate model we built.
 
-Można oczywiście tworzyć następne modele, wyrzucać kolejne zmienne odstające i je analizować, jednak my postanowiliśmy ograniczyć się tylko do tych kilku modeli. Natomiast widać spory problem w tym, że regresja liniowa nie jest idealnym modelem dla naszego zbioru danych.
+Of course, additional models could be developed by excluding further outliers or refining feature selection. However, we chose to focus only on a limited number of models. Still, our findings suggest that linear regression is not an ideal modeling technique for this dataset, as it exhibits significant limitations in predictive accuracy.
