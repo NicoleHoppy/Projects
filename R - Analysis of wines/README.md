@@ -613,7 +613,7 @@ To assess multicollinearity, we’ll use the Variance Inflation Factor (VIF).
 
 ```{r}
 VIF = function(i){
-  data.frame("Nazwa" = get_name(i), t(vif(get_model(i))))
+  data.frame("Name" = get_name(i), t(vif(get_model(i))))
 }
 ```
 
@@ -626,9 +626,9 @@ In every model, the highest VIF values appear for ‘density’, ‘residual sug
 Before selecting the best model, let’s examine how well each model fits the data using standard fit metrics.
 
 ```{r}
-data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
-           "Skorygowany współczynnik determinacji"  = mapply(function(index){summary(get_model(index))$adj.r.squared}, 1:countM),
-           "Estymator wariancji błędów" = mapply(function(index){summary(get_model(index))$sigma}, 1:countM),
+data.frame("Model's name" = mapply(get_name, 1:countM),
+           "Adjusted R-squared"  = mapply(function(index){summary(get_model(index))$adj.r.squared}, 1:countM),
+           "Estimator of error variance" = mapply(function(index){summary(get_model(index))$sigma}, 1:countM),
            check.names = FALSE)
 ```
 
@@ -676,8 +676,7 @@ From the generated table, we observe that the models with the lowest residual su
 Let’s now evaluate the performance of this chosen model.
 
 ```{r}
-prediction_summary = NULL
-prediction_summary <- data.frame(matrix(ncol = 4, nrow = 0, dimnames = list(NULL, c("Nazwa", "RSS", "odsetek popr. kl","Odsetek kl. o 1"))))
+prediction_summary <- data.frame(matrix(ncol = 4, nrow = 0, dimnames = list(NULL, c("Name", "RSS", "Percentage of correct predictions","Percentage of differences"))))
 
 make_prediction(9, tst, pca_tst)
 
