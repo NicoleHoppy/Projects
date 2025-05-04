@@ -66,11 +66,19 @@ To get a better feel for the data, let’s look at a summary:
 summary(wine)
 ```
 
+<p align="center">
+<img src="images/image3.png" alt="Figure 3" width = 1000 />
+</p>
+
 Before diving in deeper, let’s also check whether there are any missing values in the dataset.
 
 ```{r}
 (sapply(wine, function(x) {sum(is.na(x))}))
 ```
+
+<p align="center">
+<img src="images/image4.png" alt="Figure 4" width = 1000 />
+</p>
 
 As we can see, there are some NA values in the table. Since they represent only a small portion of the data, we’ll go ahead and drop those rows. Missing data could affect the quality of our analysis later on, so it’s better to clean it up now.
 
