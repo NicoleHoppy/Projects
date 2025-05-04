@@ -317,8 +317,8 @@ par(mfrow = c(1, 2))
 
 pca     <- prcomp(lrn[1:11], scale. = TRUE)
 pca_var <- pca$sdev^2
-plot(pca_var / sum(pca_var), xlab = "Składowe główne",
- ylab = "Proporcja wariancji objaśnianej",
+plot(pca_var / sum(pca_var), xlab = "Principal Components",
+ ylab = "Explained variance ratio",
  type = "b")
 
 pca_data <- data.frame(quality = lrn$quality, pca$x)
@@ -400,7 +400,7 @@ cook_base = countM
 
 cook_statistics = function(name, model, ispca){
   cook <- cooks.distance(model)
-  plot(cook, xlab = "Indeksy",  ylab = paste("Odległości(", name, ")"))
+  plot(cook, xlab = "Indexes",  ylab = paste("Distance(", name, ")"))
   if(max(cook) >= 1){
     name <- paste('cook', name, sep = ' ')
     while(max(cook) >= 1){
@@ -419,7 +419,7 @@ for(i in 1:cook_base){
   cook_statistics(name, model, is_pca(i))
 }
 
-mtext("Odległość Cooka", side=3, outer=TRUE, line=-3)
+mtext("Cook’s distance", side=3, outer=TRUE, line=-3)
 ```
 
 <p align="center">
@@ -444,7 +444,7 @@ leverages <- mapply(function(index){
     p <- (index - 1) %% 3
     q <- ifelse((index - 1) %% 6 >= 3, 0, 1)
     par(fig = c(1/3 * p,1/3 + 1/3 * p, 0.5 * q, 0.5 + 0.5 * q), new = (index %% 6 != 1))
-    plot(lev, xlab = "Indeksy", ylab = "Obserwacje wpływowe", main = name)
+    plot(lev, xlab = "Indexes", ylab = "Influential Observations", main = name)
     abline(h = 2 * sum(lev) / nrow(model$model), col = 'red')
     lev
   }, 1:countM)
@@ -487,7 +487,7 @@ for(i in 1:countM){
   p <- (i - 1) %% 4
   q <- ifelse((i - 1) %% 8 >= 4, 0, 1)
   par(fig = c(1/4 * p, 1/4 + 1/4 * p, 0.5 * q, 0.5 + 0.5 * q), new = (i %% 8 != 1))
-  plot(model$fit, model$res, xlab="Dopasowane", ylab="Reszty", main = get_name(i))
+  plot(model$fit, model$res, xlab="Fitted", ylab="Residuals", main = get_name(i))
   abline(h = 0, col = 'red')}
 ```
 
