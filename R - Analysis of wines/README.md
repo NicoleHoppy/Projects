@@ -559,7 +559,7 @@ for(i in 1:countM){
   p <- (i - 1) %% 4
   q <- ifelse((i - 1) %% 8 >= 4, 0, 1)
   par(fig = c(1/4 * p, 1/4 + 1/4 * p, 0.5 * q, 0.5 + 0.5 * q), new = (i %% 8 != 1))
-  plot(model$fit, model$res, xlab = "Zmienne dopasowane", ylab = "Zmienne resztowe", main = get_name(i))
+  plot(model$fit, model$res, xlab = "Fitted values", ylab = "Residual values", main = get_name(i))
   abline(h = 0, col = 'red')
 }
 ```
