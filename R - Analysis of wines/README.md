@@ -492,6 +492,14 @@ for(i in 1:countM){
   abline(h = 0, col = 'red')}
 ```
 
+<p align="center">
+<img src="images/image28.png" alt="Figure 28" width = 1000 />
+</p>
+
+<p align="center">
+<img src="images/image29.png" alt="Figure 29" width = 1000 />
+</p>
+
 In each model, we see some deviation of residuals from the fitted values. That said, the plots are fairly similar overall. Outliers identified earlier using Cook’s distance have already been removed, as shown by the differences between the original and updated models. Only the residual plots for ‘no alcohol’ and ‘no sugar, no alcohol’ stand out as looking quite different from the others.
 
 ### 3.5. Assumptions of Linear Regression
@@ -507,10 +515,18 @@ for(i in 1:countM){
   p <- (i - 1) %% 4
   q <- ifelse((i - 1) %% 8 >= 4, 0, 1)
   par(fig = c(1/4 * p, 1/4 + 1/4 * p, 0.5 * q, 0.5 + 0.5 * q), new = (i %% 8 != 1))
-  qqnorm(rstudent(model), xlab = "Teoretyczne Kwantyle", ylab = "Studentyzowane reszty", main = get_name(i))
+  qqnorm(rstudent(model), xlab = "Theoretical quantiles", ylab = "Studentized residuals", main = get_name(i))
   abline(0,1)
 }
 ```
+
+<p align="center">
+<img src="images/image30.png" alt="Figure 30" width = 1000 />
+</p>
+
+<p align="center">
+<img src="images/image30.png" alt="Figure 31" width = 1000 />
+</p>
 
 We can see that the residuals aren’t perfectly normally distributed — but the deviation is minor, and because we’re working with a large sample size, it’s not a major concern. Still, let’s formally test this using the Shapiro–Wilk test.
 
@@ -521,9 +537,13 @@ H<sub>0</sub>: Residuals are normally distributed
 H<sub>1</sub>: Residuals are not normally distributed
 
 ```{r}
-data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
+data.frame("Model's name" = mapply(get_name, 1:countM),
            "p-value" = mapply(function(i){ shapiro.test(get_model(i)$residuals)$p.value }, 1:countM)) 
 ```
+
+<p align="center">
+<img src="images/image32.png" alt="Figure 32" width = 1000 />
+</p>
 
 According to the test results, we must reject H₀ — suggesting that none of the models have normally distributed residuals. This may seem contradictory to what the plots showed, but large sample sizes can make even small deviations statistically significant, which is a known limitation of such tests.
 
