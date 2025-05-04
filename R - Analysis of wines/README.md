@@ -21,9 +21,8 @@ library(RColorBrewer)
 
 ## 2. Dane - ich struktura oraz klasyfikacja
 
-Załadujmy plik winequalityN.csv oraz prześledźmy jego strukturę danych.
+Let's load the winequalityN.csv file and take a quick look at the structure of the dataset.
 
-Załadujmy plik winequalityN.csv oraz prześledźmy jego strukturę danych.
 
 ```{r}
 wine <- read.csv("C:\\Users\\Nikola\\Documents\\Nikola Chmielewska\\R\\Datasets\\winequalityN.csv")
@@ -33,54 +32,55 @@ str(wine)
 unique(wine$type)
 ```
 
-Na podstawie powyższej komendy widzimy, że zbiór danych zawiera również informacje o wariancie wina: czerwonym i białym.
+From the command above, we can see that the dataset includes information on two wine types: red and white.
 
-Dokonajmy jeszcze objaśnienia zmiennych występujących w zbiorze danych.
+Now, let’s break down the variables included in the dataset to better understand what we’re working with:
 
-| Nazwa | Opis | 
+| Name | Description | 
 |:--------|:--------|
-| type | rodzaj wina (białe, czerwone) |
-| fixed.acidity | stała kwasowość |
-| volatile acidity | zmienna kwasowość |
-| citric acid | kwas cytrynowy |
-| residual sugar | resztowy cukier |
-| chlorides |	chlorki |
-| free sulfur dioxide | 	wolny dwutlenek siarki |
-| total sulfur dioxide | 	całkowity dwutlenek siarki |
-| density |	gęstość |
-| pH – potential of hydrogen | współczynnik kwasowości/zasadowości pH |
-| sulphates | siarczyny |
-| alcohol | alkohol |
-| quality |	jakość |
+| type | Type of wine (white or red) |
+| fixed.acidity |	Fixed acidity |
+| volatile acidity | Volatile acidity |
+| citric acid |	Citric acid |
+| residual sugar | Residual sugar |
+| chlorides |	Chlorides |
+| free sulfur dioxide | Free sulfur dioxide |
+| total sulfur dioxide | Total sulfur dioxide |
+| density |	Density |
+| pH – potential of hydrogen |	Acidity/basicity (pH level) |
+| sulphates | Sulphates |
+| alcohol | Alcohol content |
+| quality |	Wine quality rating |
 
-Oraz, aby lepiej zrozumieć dane, zobaczmy ich podsumowanie:
+To get a better feel for the data, let’s look at a summary:
 
 ```{r}
 summary(wine)
 ```
 
-Sprawdźmy jeszcze, czy w zbiorze wszystkie dane są podane:
+Before diving in deeper, let’s also check whether there are any missing values in the dataset.
 
 ```{r}
 (sapply(wine, function(x) {sum(is.na(x))}))
 ```
-Jak widać powyżej, nasza tabela zawiera wartości NA. Usuniemy zatem wiersze, które nie posiadają danych, ponieważ w kontekście całego zbioru danych jest to marginalna ilość. Robimy to, ponieważ brak danych może obniżyć jakość późniejszej analizy danych.
+
+As we can see, there are some NA values in the table. Since they represent only a small portion of the data, we’ll go ahead and drop those rows. Missing data could affect the quality of our analysis later on, so it’s better to clean it up now.
 
 ```{r}
 wine_clean <- na.omit(wine) #usuwa wiersze zawierające wartości NA
 ```
 
-Wyświetlmy jeszcze raz nasz nowy zbiór danych z usuniętymi wartościami NA.
+Once we remove the rows with missing values, let’s take another look at our updated dataset.
 
 ```{r}
 (sapply(wine_clean, function(x) {sum(is.na(x))}))
 ```
 
-Jak widzimy, w tej chwili żadna zmienna nie jest obarczona brakiem danych, więc nasz zbiór danych jest gotowy do obróbki.
+Now everything looks good — no missing data, so our dataset is ready to go!
 
-Jednocześnie w powyższym zestawie danych zmienną zależną jest atrybut quality, a więc ocena jakości wina. Pozostałe zmienne są zmiennymi niezależnymi, ponieważ wpływają one na końcową ocenę wina; są to również zmienne ilościowe. Natomiast zmienną objaśnianą ‘quality’ można potraktować zarówno jako zmienną ilościową oraz jako zmienną nominalną o uporządkowanych kategoriach (jakościową). 
+In this dataset, the variable we’re trying to predict is quality, which represents the wine’s rating. All the other variables are independent (predictor) variables, and they’re numerical in nature. As for quality, it can actually be seen in two ways: either as a continuous numeric variable or as an ordinal categorical variable (since it reflects a quality rating).
 
-W niniejszej pracy zmienną 'quality' potraktujemy jako zmienną ilościową, rozważając modele regresji liniowej. Jednak podczas tworzenia modelu proporcjonalnych szans, zmienną ‘quality’ potraktujemy jako zmienną jakościową. Warto w tym miejscu zaznaczyć, że w celu weryfikacji hipotez będziemy zakładać poziom istotności *α = 0,05*.
+In our analysis, we’ll first treat quality as a numeric variable when applying linear regression. But later on, when we build a proportional odds model, we’ll treat it as an ordinal categorical variable. Also, for hypothesis testing, we’ll be using a significance level of α = 0.05.
 
 ### 2.1 Podział zbioru danych
 
