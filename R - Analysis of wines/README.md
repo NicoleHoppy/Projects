@@ -100,7 +100,7 @@ Now everything looks good — no missing data, so our dataset is ready to go!
 
 In this dataset, the variable we’re trying to predict is quality, which represents the wine’s rating. All the other variables are independent (predictor) variables, and they’re numerical in nature. As for quality, it can actually be seen in two ways: either as a continuous numeric variable or as an ordinal categorical variable (since it reflects a quality rating).
 
-In our analysis, we’ll first treat quality as a numeric variable when applying linear regression. But later on, when we build a proportional odds model, we’ll treat it as an ordinal categorical variable. Also, for hypothesis testing, we’ll be using a significance level of α = 0.05.
+In our analysis, we’ll first treat quality as a numeric variable when applying linear regression. But later on, when we build a proportional odds model, we’ll treat it as an ordinal categorical variable. Also, for hypothesis testing, we’ll be using a significance level of *α = 0.05*.
 
 ### 2.1. Splitting the Dataset
 
@@ -151,6 +151,10 @@ white_matrix <- cor(lrn)
 corrplot(white_matrix, type = "lower")
 ```
 
+<p align="center">
+<img src="images/image6.png" alt="Figure 6" width = 1000 />
+</p>
+
 *Correlation* tells us how two variables move together. The Pearson correlation coefficient (which ranges from -1 to 1) is a handy number that shows us the strength and direction of the relationship.
 
 A positive value means both variables tend to increase together, while a negative value means that as one goes up, the other tends to go down. The closer the value is to either -1 or 1, the stronger the relationship. If it’s closer to 0, it usually means there’s not much of a connection.
@@ -200,6 +204,22 @@ for(i in 1:countM){
   print(summary(get_model(i)))
 }
 ```
+
+<p align="center">
+<img src="images/image7.png" alt="Figure 7" width = 1000 />
+</p>
+
+<p align="center">
+<img src="images/image8.png" alt="Figure 8" width = 1000 />
+</p>
+
+<p align="center">
+<img src="images/image9.png" alt="Figure 9" width = 1000 />
+</p>
+
+<p align="center">
+<img src="images/image10.png" alt="Figure 10" width = 1000 />
+</p>
 
 Just by glancing at the summaries, it’s pretty obvious that the last model (the one without both sugar and alcohol) performs the worst — especially when you look at the adjusted R-squared, which is way lower than in the other models. To double-check whether the smaller models are valid, we’ll run an ANOVA test.
 
