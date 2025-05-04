@@ -317,8 +317,8 @@ par(mfrow = c(1, 2))
 
 pca     <- prcomp(lrn[1:11], scale. = TRUE)
 pca_var <- pca$sdev^2
-plot(pca_var / sum(pca_var), xlab = "Składowe główne",
- ylab = "Proporcja wariancji objaśnianej",
+plot(pca_var / sum(pca_var), xlab = "Principal Components",
+ ylab = "Explained variance ratio",
  type = "b")
 
 pca_data <- data.frame(quality = lrn$quality, pca$x)
@@ -400,7 +400,7 @@ cook_base = countM
 
 cook_statistics = function(name, model, ispca){
   cook <- cooks.distance(model)
-  plot(cook, xlab = "Indeksy",  ylab = paste("Odległości(", name, ")"))
+  plot(cook, xlab = "Indexes",  ylab = paste("Distance(", name, ")"))
   if(max(cook) >= 1){
     name <- paste('cook', name, sep = ' ')
     while(max(cook) >= 1){
@@ -419,7 +419,7 @@ for(i in 1:cook_base){
   cook_statistics(name, model, is_pca(i))
 }
 
-mtext("Odległość Cooka", side=3, outer=TRUE, line=-3)
+mtext("Cook’s distance", side=3, outer=TRUE, line=-3)
 ```
 
 <p align="center">
@@ -444,7 +444,7 @@ leverages <- mapply(function(index){
     p <- (index - 1) %% 3
     q <- ifelse((index - 1) %% 6 >= 3, 0, 1)
     par(fig = c(1/3 * p,1/3 + 1/3 * p, 0.5 * q, 0.5 + 0.5 * q), new = (index %% 6 != 1))
-    plot(lev, xlab = "Indeksy", ylab = "Obserwacje wpływowe", main = name)
+    plot(lev, xlab = "Indexes", ylab = "Influential Observations", main = name)
     abline(h = 2 * sum(lev) / nrow(model$model), col = 'red')
     lev
   }, 1:countM)
@@ -459,7 +459,6 @@ leverages <- mapply(function(index){
 </p>
 
 After removing outliers, the resulting models have much cleaner plots. However, the visuals themselves aren’t particularly informative on their own — so we’ll compute the percentage of influential observations for each model and present the results in a table.
-
 
 ```{r}
 data.frame(names = mapply(get_name, 1:countM), 
@@ -488,7 +487,7 @@ for(i in 1:countM){
   p <- (i - 1) %% 4
   q <- ifelse((i - 1) %% 8 >= 4, 0, 1)
   par(fig = c(1/4 * p, 1/4 + 1/4 * p, 0.5 * q, 0.5 + 0.5 * q), new = (i %% 8 != 1))
-  plot(model$fit, model$res, xlab="Dopasowane", ylab="Reszty", main = get_name(i))
+  plot(model$fit, model$res, xlab="Fitted", ylab="Residuals", main = get_name(i))
   abline(h = 0, col = 'red')}
 ```
 
@@ -564,6 +563,14 @@ for(i in 1:countM){
 }
 ```
 
+<p align="center">
+<img src="images/image33.png" alt="Figure 33" width = 1000 />
+</p>
+
+<p align="center">
+<img src="images/image34.png" alt="Figure 34" width = 1000 />
+</p>
+
 We’ll also apply the Goldfeld–Quandt test, which formally checks for heteroscedasticity. Here are the hypotheses:
 
 H<sub>0</sub>: Residuals have constant variance
@@ -571,9 +578,13 @@ H<sub>0</sub>: Residuals have constant variance
 H<sub>1</sub>: Residuals do not have constant variance
 
 ```{r}
-data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
+data.frame("Models name" = mapply(get_name, 1:countM),
            "p-value" = mapply(function(i){ gqtest(get_model(i))$p.value }, 1:countM)) 
 ```
+
+<p align="center">
+<img src="images/image35.png" alt="Figure 35" width = 1000 />
+</p>
 
 Across all models, we fail to reject H₀ at the α = 0.05 level. This suggests that the assumption of constant variance holds.
 
@@ -582,12 +593,17 @@ Across all models, we fail to reject H₀ at the α = 0.05 level. This suggests 
 To check whether residuals are correlated, we use the Durbin–Watson test. Hypotheses:
 
 H<sub>0</sub>: Residuals are not autocorrelated
+
 H<sub>1</sub>: Residuals are autocorrelated
 
 ```{r}
-data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
+data.frame("Model's name" = mapply(get_name, 1:countM),
            "p-value" = mapply(function(i){ durbinWatsonTest(get_model(i))$p }, 1:countM)) 
 ```
+
+<p align="center">
+<img src="images/image36.png" alt="Figure 36" width = 1000 />
+</p>
 
 Test results show no reason to reject H<sub>0</sub> — in other words, residuals appear to be uncorrelated in all our models.
 
@@ -597,7 +613,7 @@ To assess multicollinearity, we’ll use the Variance Inflation Factor (VIF).
 
 ```{r}
 VIF = function(i){
-  data.frame("Nazwa" = get_name(i), t(vif(get_model(i))))
+  data.frame("Name" = get_name(i), t(vif(get_model(i))))
 }
 ```
 
@@ -610,9 +626,9 @@ In every model, the highest VIF values appear for ‘density’, ‘residual sug
 Before selecting the best model, let’s examine how well each model fits the data using standard fit metrics.
 
 ```{r}
-data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
-           "Skorygowany współczynnik determinacji"  = mapply(function(index){summary(get_model(index))$adj.r.squared}, 1:countM),
-           "Estymator wariancji błędów" = mapply(function(index){summary(get_model(index))$sigma}, 1:countM),
+data.frame("Model's name" = mapply(get_name, 1:countM),
+           "Adjusted R-squared"  = mapply(function(index){summary(get_model(index))$adj.r.squared}, 1:countM),
+           "Estimator of error variance" = mapply(function(index){summary(get_model(index))$sigma}, 1:countM),
            check.names = FALSE)
 ```
 
@@ -660,8 +676,7 @@ From the generated table, we observe that the models with the lowest residual su
 Let’s now evaluate the performance of this chosen model.
 
 ```{r}
-prediction_summary = NULL
-prediction_summary <- data.frame(matrix(ncol = 4, nrow = 0, dimnames = list(NULL, c("Nazwa", "RSS", "odsetek popr. kl","Odsetek kl. o 1"))))
+prediction_summary <- data.frame(matrix(ncol = 4, nrow = 0, dimnames = list(NULL, c("Name", "RSS", "Percentage of correct predictions","Percentage of differences"))))
 
 make_prediction(9, tst, pca_tst)
 
