@@ -476,9 +476,9 @@ This simple test, based on R² values, tells us how much a variable’s variance
 
 In every model, the highest VIF values appear for ‘density’, ‘residual sugar’, and ‘alcohol’. These are clearly the most collinear variables — though the issue isn’t extreme across the dataset. Models that exclude these variables naturally show lower multicollinearity.
 
-## 7. Miary dopasowania
+## 7. Goodness-of-Fit Measures
 
-Przed wybraniem najlepszego modelu, spójrzmy jeszcze na miary dopasowania modelu do danych.
+Before selecting the best model, let’s examine how well each model fits the data using standard fit metrics.
 
 ```{r}
 data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
@@ -487,11 +487,11 @@ data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
            check.names = FALSE)
 ```
 
-Widzimy, że gdybyśmy mieli wybierać najlepszy model na podstawie skorygowanego współczynnika determinacji, to wybralibyśmy model ‘cook no acid, no chlorides, no totalsulf’. Jednak wybór najlepszego modelu opieramy na wyniku resztowej sumy kwadratów.
+Looking at the results, if we were to base our choice solely on the adjusted R-squared, the best model would be ‘cook no acid, no chlorides, no totalsulf’. However, our selection will be based on the Residual Sum of Squares (RSS) instead.
 
-## 8. Wybór najlepszego modelu na podstawie RSS oraz jego test
+## 8. Best Model Selection Based on RSS and Model Evaluation
 
-Stwórzmy funkcję, która pokaże odpowiednio: nazwę modelu; resztową sumę kwadratów pomiędzy obserwacjami empirycznymi z próby walidacyjnej, a przewidzianymi przez model regresji liniowej; odsetek poprawnych klasyfikacji; odsetek poprawnych klasyfikacji różniących się o co najwyżej jeden.
+We’ll create a function that returns the following for each model: the model name, the residual sum of squares between the validation sample and predicted values, the percentage of correct classifications, and the percentage of classifications within ±1 of the true value.
 
 ```{r}
 pca_val <- as.data.frame(predict(pca, newdata = val[1:11]))
@@ -526,9 +526,9 @@ for(i in 1:countM){ make_prediction(i, val, pca_val) }
 prediction_summary
 ```
 
-Poprzez utworzoną tabelę, dostrzegamy że modele o najmniejszej resztowej sumie kwadratów, a więc nasze najlepsze modele na tej podstawie, to ‘pca no pc6’ oraz ‘pca no pc6, no pc7’. Jednak model ‘pca no 6’ ma większy odsetek poprawnych klasyfikacji, dlatego to właśnie on zostanie wybrany do dalszych testów.
+From the generated table, we observe that the models with the lowest residual sum of squares — and therefore the best by this metric — are ‘pca no pc6’ and ‘pca no pc6, no pc7’. However, since ‘pca no pc6’ has a higher rate of correct classifications, we choose it as the final model for further testing.
 
-Przetestujmy teraz w takim razie nasz najlepszy model.
+Let’s now evaluate the performance of this chosen model.
 
 ```{r}
 prediction_summary = NULL
@@ -540,18 +540,18 @@ prediction_summary
 
 ```
 
-Widzimy, że nasz model nie jest wybitny, natomiast dobrze poradził sobie z próbą testową, przewidując ponad połowę poprawnych klasyfikacji. Możemy z tego wywnioskować, że jest to najlepszy utworzony przez nas model regresji liniowej, z drugiej jednak strony sama regresja liniowa jest obarczona dużym błędem w przewidywaniach.
+Although it’s not outstanding, the model performs decently on the test set, correctly predicting over half of the classifications. We can conclude that this is the best linear regression model we’ve built — but it's also clear that linear regression itself comes with considerable prediction error.
 
-## 9. Model proporcjonalnych szans
+## 9. Proportional Odds Model
 
-W celu zobrazowania zmiany zmiennej quality na zmienną jakościową utworzymy model proporcjonalnych szans:
+To adapt the quality variable into a categorical format, we’ll build a proportional odds (ordinal logistic regression) model.
 
 ```{r}
 wine1 <- white_numeric
 wine1$quality <- factor(wine1$quality)
 ```
 
-Oraz podzielimy nasz zbiór na 3 podzbiory, jak wcześniej.
+We’ll again split the data into the same three subsets as before.
 
 ```{r}
 lrn2 <- wine1[I_l,]
@@ -559,20 +559,20 @@ val2 <- wine1[I_v,]
 tst2 <- wine1[I_t,]
 ```
 
-Utworzony model wygląda następująco:
+The initial model is constructed as follows:
 
 ```{r}
 g.plr <- polr(quality ~ ., data = lrn2)
 g.plr
 ```
 
-Przyjrzyjmy się teraz jego podsumowaniu.
+Now, let’s look at the model summary.
 
 ```{r}
 summary(g.plr)
 ```
 
-Zastosujemy funkcję predict() do przewidywania wartości dla tego modelu.
+We use the predict() function to make predictions with this model.
 
 ```{r}
 pr_log1 <- predict(g.plr, val2[,1:11], type="class")
@@ -581,7 +581,7 @@ val21 <- as.numeric(val2$quality)
 pr_log11 <- as.numeric(pr_log1)
 ```
 
-Oraz obliczmy resztową sumę kwadratów.
+Then we compute the residual sum of squares.
 
 ```{r}
 sum((pr_log11-val21)^2)
@@ -593,9 +593,9 @@ Widzimy, że model jest przeciętny, więc ulepszymy go. Uprościmy model za pom
 o_lr = step(g.plr)
 ```
 
-Utworzony model ma mniej zmiennych zależnych w celu zmniejszenia AIC, która estymuje liczbę utraconych danych przez dany model. Im mniej danych model utracił, tym lepszej jest jakości. Innymi słowy AIC określa ryzyko przeszacowania oraz niedoszacowania modelu.
+The model turns out to be mediocre, so we attempt to improve it. We simplify the model using the step() function to minimize the AIC — a criterion that estimates the information lost by a model. The smaller the AIC, the better the model in terms of avoiding overfitting or underfitting.
 
-Spójrzmy teraz na podsumowanie.
+Let’s look at the summary of the reduced model.
 
 ```{r}
 summary(o_lr)
@@ -605,7 +605,7 @@ summary(o_lr)
 anova(g.plr,o_lr)
 ```
 
-Widzimy, że mniejszy model jest jak najbardziej zasadny. Policzmy resztową sumę kwadratów.
+We see that this smaller model is statistically justified. However, when we recalculate the residual sum of squares…
 
 ```{r}
 pr_log2<-predict(o_lr, val2[,1:11],type="class")
@@ -615,12 +615,12 @@ pr_log12 <- as.numeric(pr_log2)
 sum((pr_log12-val21)^2)
 ```
 
-Resztowa suma kwadratów jest większa, wiec model nie jest tak dobry jak wyjściowy, klasyfikując modele na podstawie tego kryterium, dlatego żaden z tych modeli nie jest lepszy w porównaniu z najlepszym modelem regresji liniowej.
+…it turns out to be larger than for the full model. So, based on this criterion, the simplified model is not better. In fact, neither of the proportional odds models outperform the best linear regression model we selected earlier.
 
-## 10. Podsumowanie
+## 10. Summary
 
-W projekcie utworzone zostało 17 modeli regresji liniowych oraz 2 modele proporcjonalnych szans.
+In this project, we constructed 17 linear regression models and 2 proportional odds models.
 
-Wśród wszystkich modeli najmniejszą wartość resztowej sumy kwadratów osiągnął model regresji liniowej, który został ostatecznie przetestowany dla zbioru testowego. Na jego podstawie określiliśmy, że model regresji liniowej jest całkiem dokładny, ponieważ próba testowa dała nam bardzo dobry wynik.
+Among them, the linear regression model selected for final testing produced the lowest residual sum of squares. It also performed well on the test set, correctly classifying over half of the values — indicating that, within our modeling scope, it is the most accurate model we built.
 
-Można oczywiście tworzyć następne modele, wyrzucać kolejne zmienne odstające i je analizować, jednak my postanowiliśmy ograniczyć się tylko do tych kilku modeli. Natomiast widać spory problem w tym, że regresja liniowa nie jest idealnym modelem dla naszego zbioru danych.
+Of course, additional models could be developed by excluding further outliers or refining feature selection. However, we chose to focus only on a limited number of models. Still, our findings suggest that linear regression is not an ideal modeling technique for this dataset, as it exhibits significant limitations in predictive accuracy.
