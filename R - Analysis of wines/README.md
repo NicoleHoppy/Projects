@@ -326,6 +326,10 @@ pca_data <- data.frame(quality = lrn$quality, pca$x)
 corrplot(cor(pca_data), type = "lower")
 ```
 
+<p align="center">
+<img src="images/image18.png" alt="Figure 18" width = 1000 />
+</p>
+
 Looking at the plot, we can see that two of the components fall below the significance threshold of *α = 0.05*, suggesting they don’t contribute much to the model. The adjacent chart also confirms that all the new variables (except ‘quality’) are uncorrelated — which is one of the key benefits of PCA. We'll also apply backward elimination here to remove those components that don’t seem to matter much.
 
 ### 3.3. Backward Elimination with PCA and ANOVA
@@ -337,14 +341,26 @@ pca_base <- add_model('pca', lm(quality ~ ., data = pca_data), TRUE)
 summary(get_model(countM))
 ```
 
+<p align="center">
+<img src="images/image19.png" alt="Figure 19" width = 600 />
+</p>
+
 ```{r}
 add_model('pca no pc6', lm(quality ~ . - PC6, data = pca_data), TRUE)
 anova(get_model(pca_base), get_model(countM))
 ```
 
+<p align="center">
+<img src="images/image20.png" alt="Figure 20" width = 1000 />
+</p>
+
 ```{r}
 summary(get_model(countM))
 ```
+
+<p align="center">
+<img src="images/image21.png" alt="Figure 21" width = 600 />
+</p>
 
 After removing the component ‘PC6’, the model still performs well — in fact, we can’t reject the null hypothesis at the *α = 0.05* level, meaning the reduced model is adequate. Next, we try removing ‘PC7’ as well.
 
@@ -353,19 +369,27 @@ add_model('pca no pc6, no pc7', lm(quality ~ . - PC6 - PC7, data = pca_data), TR
 anova(get_model(pca_base), get_model(countM))
 ```
 
+<p align="center">
+<img src="images/image22.png" alt="Figure 22" width = 1000 />
+</p>
+
 ```{r}
 summary(get_model(countM))
 ```
 
+<p align="center">
+<img src="images/image23.png" alt="Figure 23" width = 600 />
+</p>
+
 Again, the model remains adequate. Since we’re still unable to reject null hypothesis, we conclude that both PC6 and PC7 are unnecessary. But beyond this point, removing more components doesn’t make sense — the remaining ones are clearly significant.
 
-## 4. Model Diagnostics
+### 3.4. Model Diagnostics
 
 Now it’s time to dive into the diagnostics for our models. We’ll look at Cook’s distance to identify and remove any outliers, then rebuild the models without those points. We’ll also calculate what percentage of our data points are considered influential and inspect residual plots for further insight.
 
 A quick recap: *Cook’s distance* is a measure used in regression analysis to identify observations that have a large influence on the fitted model.
 
-### 4.1. Outlier Detection
+#### 3.4.1. Outlier Detection
 
 We’ll create a helper function to automate the process of computing Cook’s distance and generating the necessary plots.
 
@@ -400,7 +424,7 @@ mtext("Odległość Cooka", side=3, outer=TRUE, line=-3)
 
 Looking at the plots, we see that the ‘no sugar’, ‘no alcohol’, and ‘no sugar, no alcohol’ models don’t contain any outliers — all Cook’s distances are below 1. Other models do contain outliers, so we automatically rebuild those models after removing the influential points. In each case, no more than one outlier was detected.
 
-### 4.2. Influential Observations
+#### 3.4.2. Influential Observations
 
 Next, we’ll focus on influential points. We'll generate plots showing where the threshold lies for each model, to better visualize which observations cross the line.
 
@@ -436,7 +460,7 @@ data.frame(names = mapply(get_name, 1:countM),
 
 There’s a clear difference in how these influential observations are distributed across the various models.
 
-### 4.3. Residual Plots
+#### 3.4.3. Residual Plots
 
 Let’s also take a look at the residual plots for all models.
 
@@ -454,8 +478,8 @@ for(i in 1:countM){
 
 In each model, we see some deviation of residuals from the fitted values. That said, the plots are fairly similar overall. Outliers identified earlier using Cook’s distance have already been removed, as shown by the differences between the original and updated models. Only the residual plots for ‘no alcohol’ and ‘no sugar, no alcohol’ stand out as looking quite different from the others.
 
-## 5. Assumptions of Linear Regression
-### 5.1. Normality of Residuals
+### 3.5. Assumptions of Linear Regression
+#### 3.5.1. Normality of Residuals
 
 First, let’s inspect the residual plots.
 
@@ -487,7 +511,7 @@ data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
 
 According to the test results, we must reject H₀ — suggesting that none of the models have normally distributed residuals. This may seem contradictory to what the plots showed, but large sample sizes can make even small deviations statistically significant, which is a known limitation of such tests.
 
-### 5.2. Homoscedasticity (Constant Variance)
+#### 3.5.2. Homoscedasticity (Constant Variance)
 
 To test for constant variance, we’ll create residual-vs-fitted plots for each model.
 
@@ -517,7 +541,7 @@ data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
 
 Across all models, we fail to reject H₀ at the α = 0.05 level. This suggests that the assumption of constant variance holds.
 
-### 5.3. Residual Independence
+#### 3.5.3. Residual Independence
 
 To check whether residuals are correlated, we use the Durbin–Watson test. Hypotheses:
 
@@ -531,7 +555,7 @@ data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
 
 Test results show no reason to reject H<sub>0</sub> — in other words, residuals appear to be uncorrelated in all our models.
 
-## 6. Multicollinearity of Predictors
+### 3.6. Multicollinearity of Predictors
 
 To assess multicollinearity, we’ll use the Variance Inflation Factor (VIF).
 
@@ -545,7 +569,7 @@ This simple test, based on R² values, tells us how much a variable’s variance
 
 In every model, the highest VIF values appear for ‘density’, ‘residual sugar’, and ‘alcohol’. These are clearly the most collinear variables — though the issue isn’t extreme across the dataset. Models that exclude these variables naturally show lower multicollinearity.
 
-## 7. Goodness-of-Fit Measures
+### 3.7. Goodness-of-Fit Measures
 
 Before selecting the best model, let’s examine how well each model fits the data using standard fit metrics.
 
@@ -558,7 +582,7 @@ data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
 
 Looking at the results, if we were to base our choice solely on the adjusted R-squared, the best model would be ‘cook no acid, no chlorides, no totalsulf’. However, our selection will be based on the Residual Sum of Squares (RSS) instead.
 
-## 8. Best Model Selection Based on RSS and Model Evaluation
+### 3.8. Best Model Selection Based on RSS and Model Evaluation
 
 We’ll create a function that returns the following for each model: the model name, the residual sum of squares between the validation sample and predicted values, the percentage of correct classifications, and the percentage of classifications within ±1 of the true value.
 
@@ -611,7 +635,7 @@ prediction_summary
 
 Although it’s not outstanding, the model performs decently on the test set, correctly predicting over half of the classifications. We can conclude that this is the best linear regression model we’ve built — but it's also clear that linear regression itself comes with considerable prediction error.
 
-## 9. Proportional Odds Model
+## 4. Proportional Odds Model
 
 To adapt the quality variable into a categorical format, we’ll build a proportional odds (ordinal logistic regression) model.
 
@@ -686,7 +710,7 @@ sum((pr_log12-val21)^2)
 
 …it turns out to be larger than for the full model. So, based on this criterion, the simplified model is not better. In fact, neither of the proportional odds models outperform the best linear regression model we selected earlier.
 
-## 10. Summary
+## 5. Summary
 
 In this project, we constructed 17 linear regression models and 2 proportional odds models.
 
