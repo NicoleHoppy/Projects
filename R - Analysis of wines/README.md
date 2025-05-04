@@ -502,6 +502,7 @@ for(i in 1:countM){
 In each model, we see some deviation of residuals from the fitted values. That said, the plots are fairly similar overall. Outliers identified earlier using Cook’s distance have already been removed, as shown by the differences between the original and updated models. Only the residual plots for ‘no alcohol’ and ‘no sugar, no alcohol’ stand out as looking quite different from the others.
 
 ### 3.5. Assumptions of Linear Regression
+
 #### 3.5.1. Normality of Residuals
 
 First, let’s inspect the residual plots.
@@ -558,7 +559,7 @@ for(i in 1:countM){
   p <- (i - 1) %% 4
   q <- ifelse((i - 1) %% 8 >= 4, 0, 1)
   par(fig = c(1/4 * p, 1/4 + 1/4 * p, 0.5 * q, 0.5 + 0.5 * q), new = (i %% 8 != 1))
-  plot(model$fit, model$res, xlab = "Zmienne dopasowane", ylab = "Zmienne resztowe", main = get_name(i))
+  plot(model$fit, model$res, xlab = "Fitted values", ylab = "Residual values", main = get_name(i))
   abline(h = 0, col = 'red')
 }
 ```
@@ -632,6 +633,10 @@ data.frame("Model's name" = mapply(get_name, 1:countM),
            check.names = FALSE)
 ```
 
+<p align="center">
+<img src="images/image37.png" alt="Figure 37" width = 1000 />
+</p>
+
 Looking at the results, if we were to base our choice solely on the adjusted R-squared, the best model would be ‘cook no acid, no chlorides, no totalsulf’. However, our selection will be based on the Residual Sum of Squares (RSS) instead.
 
 ### 3.8. Best Model Selection Based on RSS and Model Evaluation
@@ -671,6 +676,10 @@ for(i in 1:countM){ make_prediction(i, val, pca_val) }
 prediction_summary
 ```
 
+<p align="center">
+<img src="images/image38.png" alt="Figure 38" width = 1000 />
+</p>
+
 From the generated table, we observe that the models with the lowest residual sum of squares — and therefore the best by this metric — are ‘pca no pc6’ and ‘pca no pc6, no pc7’. However, since ‘pca no pc6’ has a higher rate of correct classifications, we choose it as the final model for further testing.
 
 Let’s now evaluate the performance of this chosen model.
@@ -683,6 +692,10 @@ make_prediction(9, tst, pca_tst)
 prediction_summary
 
 ```
+
+<p align="center">
+<img src="images/image39.png" alt="Figure 39" width = 1000 />
+</p>
 
 Although it’s not outstanding, the model performs decently on the test set, correctly predicting over half of the classifications. We can conclude that this is the best linear regression model we’ve built — but it's also clear that linear regression itself comes with considerable prediction error.
 
@@ -710,11 +723,19 @@ g.plr <- polr(quality ~ ., data = lrn2)
 g.plr
 ```
 
+<p align="center">
+<img src="images/image40.png" alt="Figure 40" width = 1000 />
+</p>
+
 Now, let’s look at the model summary.
 
 ```{r}
 summary(g.plr)
 ```
+
+<p align="center">
+<img src="images/image41.png" alt="Figure 41" width = 1000 />
+</p>
 
 We use the predict() function to make predictions with this model.
 
@@ -731,11 +752,19 @@ Then we compute the residual sum of squares.
 sum((pr_log11-val21)^2)
 ```
 
-Widzimy, że model jest przeciętny, więc ulepszymy go. Uprościmy model za pomocą funkcji step.
+<p align="center">
+<img src="images/image42.png" alt="Figure 42" width = 1000 />
+</p>
+
+We can see that the model is average, so we’ll try to improve it. We’ll simplify the model using the step function.
 
 ```{r}
 o_lr = step(g.plr)
 ```
+
+<p align="center">
+<img src="images/image43.png" alt="Figure 43" width = 1000 />
+</p>
 
 The model turns out to be mediocre, so we attempt to improve it. We simplify the model using the step() function to minimize the AIC — a criterion that estimates the information lost by a model. The smaller the AIC, the better the model in terms of avoiding overfitting or underfitting.
 
@@ -745,9 +774,17 @@ Let’s look at the summary of the reduced model.
 summary(o_lr)
 ```
 
+<p align="center">
+<img src="images/image44.png" alt="Figure 44" width = 1000 />
+</p>
+
 ```{r}
 anova(g.plr,o_lr)
 ```
+
+<p align="center">
+<img src="images/image45.png" alt="Figure 45" width = 1000 />
+</p>
 
 We see that this smaller model is statistically justified. However, when we recalculate the residual sum of squares…
 
@@ -758,6 +795,10 @@ val21<- as.numeric(val2$quality)
 pr_log12 <- as.numeric(pr_log2)
 sum((pr_log12-val21)^2)
 ```
+
+<p align="center">
+<img src="images/image46.png" alt="Figure 46" width = 1000 />
+</p>
 
 …it turns out to be larger than for the full model. So, based on this criterion, the simplified model is not better. In fact, neither of the proportional odds models outperform the best linear regression model we selected earlier.
 
