@@ -460,7 +460,6 @@ leverages <- mapply(function(index){
 
 After removing outliers, the resulting models have much cleaner plots. However, the visuals themselves aren’t particularly informative on their own — so we’ll compute the percentage of influential observations for each model and present the results in a table.
 
-
 ```{r}
 data.frame(names = mapply(get_name, 1:countM), 
            percentages = mapply(function(index){ 
@@ -564,6 +563,14 @@ for(i in 1:countM){
 }
 ```
 
+<p align="center">
+<img src="images/image33.png" alt="Figure 33" width = 1000 />
+</p>
+
+<p align="center">
+<img src="images/image34.png" alt="Figure 34" width = 1000 />
+</p>
+
 We’ll also apply the Goldfeld–Quandt test, which formally checks for heteroscedasticity. Here are the hypotheses:
 
 H<sub>0</sub>: Residuals have constant variance
@@ -571,9 +578,13 @@ H<sub>0</sub>: Residuals have constant variance
 H<sub>1</sub>: Residuals do not have constant variance
 
 ```{r}
-data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
+data.frame("Models name" = mapply(get_name, 1:countM),
            "p-value" = mapply(function(i){ gqtest(get_model(i))$p.value }, 1:countM)) 
 ```
+
+<p align="center">
+<img src="images/image35.png" alt="Figure 35" width = 1000 />
+</p>
 
 Across all models, we fail to reject H₀ at the α = 0.05 level. This suggests that the assumption of constant variance holds.
 
@@ -582,12 +593,17 @@ Across all models, we fail to reject H₀ at the α = 0.05 level. This suggests 
 To check whether residuals are correlated, we use the Durbin–Watson test. Hypotheses:
 
 H<sub>0</sub>: Residuals are not autocorrelated
+
 H<sub>1</sub>: Residuals are autocorrelated
 
 ```{r}
-data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
+data.frame("Model's name" = mapply(get_name, 1:countM),
            "p-value" = mapply(function(i){ durbinWatsonTest(get_model(i))$p }, 1:countM)) 
 ```
+
+<p align="center">
+<img src="images/image36.png" alt="Figure 36" width = 1000 />
+</p>
 
 Test results show no reason to reject H<sub>0</sub> — in other words, residuals appear to be uncorrelated in all our models.
 
