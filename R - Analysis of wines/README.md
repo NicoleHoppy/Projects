@@ -19,10 +19,9 @@ library(nortest)
 library(RColorBrewer)
 ```
 
-## 2. Dane - ich struktura oraz klasyfikacja
+## 2. The Data – Structure and Classification
 
 Let's load the winequalityN.csv file and take a quick look at the structure of the dataset.
-
 
 ```{r}
 wine <- read.csv("C:\\Users\\Nikola\\Documents\\Nikola Chmielewska\\R\\Datasets\\winequalityN.csv")
@@ -67,7 +66,7 @@ Before diving in deeper, let’s also check whether there are any missing values
 As we can see, there are some NA values in the table. Since they represent only a small portion of the data, we’ll go ahead and drop those rows. Missing data could affect the quality of our analysis later on, so it’s better to clean it up now.
 
 ```{r}
-wine_clean <- na.omit(wine) #usuwa wiersze zawierające wartości NA
+wine_clean <- na.omit(wine) #deleting rows containing NA values
 ```
 
 Once we remove the rows with missing values, let’s take another look at our updated dataset.
@@ -107,17 +106,17 @@ Time to randomly generate the indexes for the split.
 
 ```{r}
 set.seed(300)
-I_l <- sample.int(N, size = round(N/2)) #50% danych
-I_v <- sample(setdiff(I, I_l), size = round(N/4)) #25% danych
-I_t <- setdiff(setdiff(I, I_l), I_v) #25% danych
+I_l <- sample.int(N, size = round(N/2)) #50% of the data
+I_v <- sample(setdiff(I, I_l), size = round(N/4)) #25% of the data
+I_t <- setdiff(setdiff(I, I_l), I_v) #25% of the data
 ```
 
 We’ll use those indexes to create three data subsets: a training set, a validation set, and a test set — with 50%, 25%, and 25% of the data, respectively.
 
 ```{r}
-lrn <- white_numeric[I_l,] #próba ucząca
-val <- white_numeric[I_v,] #próba walidacyjna
-tst <- white_numeric[I_t,] #próba testowa
+lrn <- white_numeric[I_l,] #training set
+val <- white_numeric[I_v,] #validation set
+tst <- white_numeric[I_t,] #test set
 ```
 
 And just like that, we’ve split our data into three parts — all set for the next steps in the analysis.
@@ -240,9 +239,9 @@ summary(get_model(countM))
 
 In the next couple of models, the same thing happens. At this point, the remaining variables are statistically significant, so it doesn’t make sense to remove any more — we’d just end up weakening the model.
 
-### 3.2. Analiza składowych głównych
+### 3.2. Principal Component Analysis (PCA)
 
-W celu zbadania innego podejścia do tworzenia modelów wykorzystamy metodę składowych głównych.
+To explore an alternative modeling approach, we’ll now use Principal Component Analysis (PCA).
 
 ```{r}
 par(mfrow = c(1, 2))
@@ -258,11 +257,11 @@ pca_data <- data.frame(quality = lrn$quality, pca$x)
 corrplot(cor(pca_data), type = "lower")
 ```
 
-Jak widać na wykresie dwie zmienne, które mają najmniejsze znaczenie są poniżej poziomu istotności α = 0,05. Z wykresu obok odczytujemy także, że udało nam się utworzyć zbiór danych, w którym wszystkie zmienne (poza ‘quality’) są niezależne. Zastosujemy także tutaj metodę wstecznej eliminacji, żeby pozbyć się zmiennych, które są nieistotne w tym modelu.
+Looking at the plot, we can see that two of the components fall below the significance threshold of *α = 0.05*, suggesting they don’t contribute much to the model. The adjacent chart also confirms that all the new variables (except ‘quality’) are uncorrelated — which is one of the key benefits of PCA. We'll also apply backward elimination here to remove those components that don’t seem to matter much.
 
-### 3.3. Metoda wstecznej eliminacji i ANOVA
+### 3.3. Backward Elimination with PCA and ANOVA
 
-Na początek tworzymy model PCA, z którego będziemy wyrzucać zmienne oraz od razu sprawdzimy, czy mniejsze modele są adekwatne względem tego modelu.
+We’ll start by building a PCA-based model and gradually eliminate components one by one — checking at each step whether the reduced model still holds up.
 
 ```{r}
 pca_base <- add_model('pca', lm(quality ~ ., data = pca_data), TRUE)
@@ -278,7 +277,7 @@ anova(get_model(pca_base), get_model(countM))
 summary(get_model(countM))
 ```
 
-Jak widać model z wyrzuconym składnikiem ‘PC6’ jest jak najbardziej adekwatny. Spróbujmy wyrzucić jeszcze jeden składnik, tym razem ‘PC7’.
+After removing the component ‘PC6’, the model still performs well — in fact, we can’t reject the null hypothesis at the *α = 0.05* level, meaning the reduced model is adequate. Next, we try removing ‘PC7’ as well.
 
 ```{r}
 add_model('pca no pc6, no pc7', lm(quality ~ . - PC6 - PC7, data = pca_data), TRUE)
@@ -289,17 +288,19 @@ anova(get_model(pca_base), get_model(countM))
 summary(get_model(countM))
 ```
 
-Wynika stąd, że ten model także jest adekwatny, a przynajmniej wiemy, że nie jesteśmy w stanie odrzucić hipotezy H<sub>0</sub> na poziomie istotności α = 0,05. Dalsze wyrzucanie zmiennych nie ma sensu, ponieważ reszta zmiennych jest jak najbardziej istotna.
+Again, the model remains adequate. Since we’re still unable to reject null hypothesis, we conclude that both PC6 and PC7 are unnecessary. But beyond this point, removing more components doesn’t make sense — the remaining ones are clearly significant.
 
-## 4. Diagnostyka
+## 4. Model Diagnostics
 
-Przyjdziemy teraz do diagnostyki naszych nowo utworzonych modeli. Przyjrzymy się *statystyce Cooka (odległość Cooka)*, żeby wykryć obserwacje odstające, pozbyć się ich i stąd dostaniemy nowe modele. Dodatkowo policzymy procentowy udział obserwacji wpływowych. Spojrzymy też na wykresy resztowe naszych modeli i spróbujemy wyciągnąć wnioski.
+Now it’s time to dive into the diagnostics for our models. We’ll look at Cook’s distance to identify and remove any outliers, then rebuild the models without those points. We’ll also calculate what percentage of our data points are considered influential and inspect residual plots for further insight.
 
-Krótkie wyjaśnienie *odległość Cooka* to miara wykorzystywana w analizie regresji, służąca do wykrywania obserwacji odstających i oszacowania ich wpływu na cały model statystyczny. 
+A quick recap: *Cook’s distance* is a measure used in regression analysis to identify observations that have a large influence on the fitted model.
 
-### 4.1. Obserwacje odstające
+### 4.1. Outlier Detection
 
-Tworzymy pomocniczą funkcję, żeby maksymalnie zautomatyzować tworzenie odległości Cooka oraz powstawanie wykresów. Pamiętamy, że za obserwację wpływową w sensie odległości Cooka uchodzą obserwacje, dla których odległość jest nie mniejsza od 1.
+We’ll create a helper function to automate the process of computing Cook’s distance and generating the necessary plots.
+
+As a rule of thumb, any observation with a Cook’s distance greater than or equal to 1 is considered influential.
 
 ```{r}
 cook_base = countM
@@ -328,11 +329,13 @@ for(i in 1:cook_base){
 mtext("Odległość Cooka", side=3, outer=TRUE, line=-3)
 ```
 
-Z powyższych wykresów jesteśmy w stanie wywnioskować, że modele ‘no sugar’, ‘no alcohol’ oraz ‘no sugar, no alcohol’ nie mają żadnych odstających obserwacji, ponieważ odległość Cooka jest mniejsza niż 1. Pozostałe modele posiadają obserwacje odstające, dlatego za pomocą funkcji, która została stworzona na początku tego podrozdziału, automatycznie stworzone zostały nowe modele z wyrzuceniem obserwacji odstającej. Warto dodać, że żaden z modeli nie posiadał więcej niż jednej obserwacji odstającej.
+Looking at the plots, we see that the ‘no sugar’, ‘no alcohol’, and ‘no sugar, no alcohol’ models don’t contain any outliers — all Cook’s distances are below 1. Other models do contain outliers, so we automatically rebuild those models after removing the influential points. In each case, no more than one outlier was detected.
 
-### 4.2. Obserwacje wpływowe
+### 4.2. Influential Observations
 
-Zajmiemy się teraz obserwacjami wpływowymi. Wyświetlimy wykresy każdego modelu wraz z linią pokazującą, od jakiego poziomu obserwacje są obserwacjami wpływowymi. W tym celu robimy funkcję, żeby po raz kolejny zautomatyzować tworzenie wykresów, ponieważ na chwilę obecną mamy ich już 17.
+Next, we’ll focus on influential points. We'll generate plots showing where the threshold lies for each model, to better visualize which observations cross the line.
+
+To handle the large number of models (we’re already up to 17), we’ll write a function that automates this step too.
 
 ```{r}
 par(mfrow = c(9, 3))
@@ -350,7 +353,8 @@ leverages <- mapply(function(index){
   }, 1:countM)
 ```
 
-Widać, że dopiero po odrzuceniu obserwacji odstających tak powstałe modele mają bardziej przejrzyste wykresy. Jednak z nich nie jesteśmy w stanie za wiele odczytać, dlatego policzymy procentowy udział obserwacji wływowych i wyświetlimy wyniki w postaci przejrzystej tabelki.
+After removing outliers, the resulting models have much cleaner plots. However, the visuals themselves aren’t particularly informative on their own — so we’ll compute the percentage of influential observations for each model and present the results in a table.
+
 
 ```{r}
 data.frame(names = mapply(get_name, 1:countM), 
@@ -361,11 +365,11 @@ data.frame(names = mapply(get_name, 1:countM),
                          }, 1:countM))
 ```
 
-Widzimy różne rozłożenie procentowe obserwacji wpływowych dla różnych modeli.
+There’s a clear difference in how these influential observations are distributed across the various models.
 
-### 4.3. Wykresy resztowe
+### 4.3. Residual Plots
 
-Spójrzmy jeszcze tylko na wykresy resztowe wszystkich modeli.
+Let’s also take a look at the residual plots for all models.
 
 ```{r}
 par(mfrow = c(ceiling(countM / 4), 4))
@@ -379,12 +383,12 @@ for(i in 1:countM){
   abline(h = 0, col = 'red')}
 ```
 
-W każdym z modeli występuje pewne odchylanie reszt od wartości dopasowanych. Widzimy, że wykresy są bardzo podobne do siebie, a wszystkie bardziej odstające punkty zostały usunięte podczas tworzenia modeli stworzonych dzięki statystyce Cooka, co widać porównując odpowiednio modele podstawowe ze zmodyfikowanymi. Jedynie wykresy modeli ‘no alcohol’ oraz ‘no sugar, no alcohol’ znacząco różnią się od reszty wykresów.
+In each model, we see some deviation of residuals from the fitted values. That said, the plots are fairly similar overall. Outliers identified earlier using Cook’s distance have already been removed, as shown by the differences between the original and updated models. Only the residual plots for ‘no alcohol’ and ‘no sugar, no alcohol’ stand out as looking quite different from the others.
 
-## 5. Poprawność założeń modeli regresji liniowej
-### 5.1. Normalność reszt
+## 5. Assumptions of Linear Regression
+### 5.1. Normality of Residuals
 
-Przyjrzyjmy się najpierw wykresom.
+First, let’s inspect the residual plots.
 
 ```{r}
 par(mfrow = c(ceiling(countM / 4), 4))
@@ -399,24 +403,24 @@ for(i in 1:countM){
 }
 ```
 
-Z wykresów widzimy, że rozkład zmiennych resztowych nie jest zupełnie normalny, ale jest to łagodne odstępstwo od założenia normalności, ponadto próbka jest duża, więc może być zignorowane. Niemniej przeprowadźmy jeszcze test statystyczny Shapiro–Wilk. 
+We can see that the residuals aren’t perfectly normally distributed — but the deviation is minor, and because we’re working with a large sample size, it’s not a major concern. Still, let’s formally test this using the Shapiro–Wilk test.
 
-Ten test ma następujące hipotezy:
+Here are the hypotheses:
 
-H<sub>0</sub>: reszty mają rozkład normalny,
+H<sub>0</sub>: Residuals are normally distributed
 
-H<sub>1</sub>: reszty nie mają rozkładu normalnego.
+H<sub>1</sub>: Residuals are not normally distributed
 
 ```{r}
 data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
            "p-value" = mapply(function(i){ shapiro.test(get_model(i)$residuals)$p.value }, 1:countM)) 
 ```
 
-Z powyższego testu wynika, że powinniśmy odrzucić hipotezę H<sub>0</sub>, czyli w żadnym modelu reszty nie mają rozkładu normalnego. Rozbieżność między testami a wykresem, może wynikać z dużej próbki, dla której niektóre testy nie są adekwatne.
+According to the test results, we must reject H₀ — suggesting that none of the models have normally distributed residuals. This may seem contradictory to what the plots showed, but large sample sizes can make even small deviations statistically significant, which is a known limitation of such tests.
 
-### 5.2. Stałość wariancji
+### 5.2. Homoscedasticity (Constant Variance)
 
-W celu zbadania stałości wariancji zrobimy wykresy zależności zmiennych resztowych od odpowiednich zmiennych dopasowanych.
+To test for constant variance, we’ll create residual-vs-fitted plots for each model.
 
 ```{r}
 par(mfrow = c(ceiling(countM / 4), 4))
@@ -431,36 +435,36 @@ for(i in 1:countM){
 }
 ```
 
-Przeprowadźmy jeszcze test Goldfeld-Quandt o stałości wariancji.
+We’ll also apply the Goldfeld–Quandt test, which formally checks for heteroscedasticity. Here are the hypotheses:
 
-H<sub>0</sub>: reszty mają stałą wariancję,
+H<sub>0</sub>: Residuals have constant variance
 
-H<sub>1</sub>: reszty nie mają stałej wariancji.
+H<sub>1</sub>: Residuals do not have constant variance
 
 ```{r}
 data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
            "p-value" = mapply(function(i){ gqtest(get_model(i))$p.value }, 1:countM)) 
 ```
 
-Widzimy, że w przypadku wszystkich modeli nie jesteśmy w stanie odrzucić hipotezy H<sub>0</sub> na poziomie istotności α = 0,05, dlatego wynika stąd, że reszty mają stałą wariancję.
+Across all models, we fail to reject H₀ at the α = 0.05 level. This suggests that the assumption of constant variance holds.
 
-### 5.3. Skorelowanie reszt
+### 5.3. Residual Independence
 
-W celu sprawdzenia, czy nasze reszty są skorelowane, posłużymy się testem Durbina-Watsona:
+To check whether residuals are correlated, we use the Durbin–Watson test. Hypotheses:
 
-H<sub>0</sub>: reszty nie są skorelowane,
-H<sub>1</sub>: istnieje korelacja reszt.
+H<sub>0</sub>: Residuals are not autocorrelated
+H<sub>1</sub>: Residuals are autocorrelated
 
 ```{r}
 data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
            "p-value" = mapply(function(i){ durbinWatsonTest(get_model(i))$p }, 1:countM)) 
 ```
 
-Na podstawie przeprowadzonego testu statystycznego, nie mamy podstaw do odrzucenia hipotezy H<sub>0</sub> o braku korelacji reszt dla każdego modelu regresji liniowej.
+Test results show no reason to reject H<sub>0</sub> — in other words, residuals appear to be uncorrelated in all our models.
 
-## 6. Współliniowość regresorów
+## 6. Multicollinearity of Predictors
 
-Aby przetestować współliniowość, posłużymy się statystyką Variance Inflation Factor.
+To assess multicollinearity, we’ll use the Variance Inflation Factor (VIF).
 
 ```{r}
 VIF = function(i){
@@ -468,9 +472,9 @@ VIF = function(i){
 }
 ```
 
-Wyliczając statystykę Variance Inflation Factor, a więc prostego testu opartego na statystyce R2, który mierzy, jaka część wariancji estymatora jest powodowana przez to, że zmienna j nie jest niezależna względem pozostałych zmiennych objaśniających w modelu regresji, jesteśmy w stanie określić współliniowość dla poszczególnych zmiennych.
+This simple test, based on R² values, tells us how much a variable’s variance is inflated due to correlations with other predictors.
 
-W każdym modelu największą miarą charakteryzują się zmienne ‘density’, ‘residual.sugar’ oraz ‘alcohol’. Możemy wywnioskować, że są to najbardziej współliniowe zmienne, natomiast nie jest to zjawisko bardzo mocno widoczne w naszym zbiorze danych. Modele bez tych parametrów są mniej współliniowe.
+In every model, the highest VIF values appear for ‘density’, ‘residual sugar’, and ‘alcohol’. These are clearly the most collinear variables — though the issue isn’t extreme across the dataset. Models that exclude these variables naturally show lower multicollinearity.
 
 ## 7. Miary dopasowania
 
