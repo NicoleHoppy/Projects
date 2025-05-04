@@ -259,12 +259,16 @@ anova(get_model(1), get_model(countM))
 ```
 
 <p align="center">
-<img src="images/image12.png" alt="Figure 12" width = 600 />
+<img src="images/image12.png" alt="Figure 12" width = 1000 />
 </p>
 
 ```{r}
 summary(get_model(countM))
 ```
+
+<p align="center">
+<img src="images/image13.png" alt="Figure 13" width = 600 />
+</p>
 
 After each removal, we’ll use ANOVA to check if the simpler model still holds up. At a significance level of *α = 0.05*, we found that we can’t reject the null hypothesis — which means the simplified models are still acceptable.
 
@@ -273,18 +277,34 @@ add_model('no acid, no chlorides', lm(quality ~ . - citric.acid - chlorides, dat
 anova(get_model(1), get_model(countM))
 ```
 
+<p align="center">
+<img src="images/image14.png" alt="Figure 14" width = 1000 />
+</p>
+
 ```{r}
 summary(get_model(countM))
 ```
+
+<p align="center">
+<img src="images/image15.png" alt="Figure 15" width = 600 />
+</p>
 
 ```{r}
 add_model('no acid, no chlorides, no totalsulf', lm(quality ~ . - citric.acid - chlorides - total.sulfur.dioxide, data = lrn), FALSE)
 anova(get_model(1), get_model(countM))
 ```
 
+<p align="center">
+<img src="images/image16.png" alt="Figure 16" width = 1000 />
+</p>
+
 ```{r}
 summary(get_model(countM))
 ```
+
+<p align="center">
+<img src="images/image17.png" alt="Figure 17" width = 600 />
+</p>
 
 In the next couple of models, the same thing happens. At this point, the remaining variables are statistically significant, so it doesn’t make sense to remove any more — we’d just end up weakening the model.
 
